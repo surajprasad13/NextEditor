@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getPages, savePage, deletePage, getBlogPosts } from '@/lib/db';
+import { NextRequest, NextResponse } from "next/server";
+import { getPages, savePage, deletePage, getBlogPosts } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type');
+    const type = searchParams.get("type");
 
-    if (type === 'blog') {
+    if (type === "blog") {
       const posts = await getBlogPosts();
       return NextResponse.json(posts);
     }
@@ -39,17 +39,27 @@ export async function POST(request: NextRequest) {
     } = body;
 
     if (!slug || !title) {
-      return NextResponse.json({ error: 'Slug and Title are required.' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Slug and Title are required." },
+        { status: 400 },
+      );
     }
 
-    const page = await savePage(slug, title, markdown || '', status, {
-      type: type || 'page',
+    const page = await savePage(slug, title, markdown || "", status, {
+      type: type || "page",
       author,
       authorImage,
       authorBio,
       date,
       scheduledFor,
-      tags: Array.isArray(tags) ? tags : tags ? String(tags).split(',').map((t: string) => t.trim()).filter(Boolean) : [],
+      tags: Array.isArray(tags)
+        ? tags
+        : tags
+        ? String(tags)
+            .split(",")
+            .map((t: string) => t.trim())
+            .filter(Boolean)
+        : [],
       category,
       featuredImage,
       excerpt,
@@ -65,10 +75,13 @@ export async function DELETE(request: NextRequest) {
   try {
     const { slug } = await request.json();
     if (!slug) {
-      return NextResponse.json({ error: 'Slug is required.' }, { status: 400 });
+      return NextResponse.json({ error: "Slug is required." }, { status: 400 });
     }
-    if (slug === '/welcome' || slug === '/') {
-      return NextResponse.json({ error: 'Core system pages cannot be deleted.' }, { status: 400 });
+    if (slug === "/welcome" || slug === "/") {
+      return NextResponse.json(
+        { error: "Core system pages cannot be deleted." },
+        { status: 400 },
+      );
     }
     const success = await deletePage(slug);
     return NextResponse.json({ success });

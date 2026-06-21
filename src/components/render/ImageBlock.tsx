@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Image as ImageIcon } from 'lucide-react';
-import { parseInlineMarkdown } from '@/lib/parser';
+import { useState } from "react";
+import { Image as ImageIcon } from "lucide-react";
+import { parseInlineMarkdown } from "@/lib/parser";
 
 interface ImageBlockProps {
   src: string;
@@ -12,15 +12,24 @@ interface ImageBlockProps {
   onChange?: (props: { src: string; alt: string; caption?: string }) => void;
 }
 
-export function ImageBlock({ src, alt, caption, isEditable = false, onChange }: ImageBlockProps) {
+export function ImageBlock({
+  src,
+  alt,
+  caption,
+  isEditable = false,
+  onChange,
+}: ImageBlockProps) {
   const [showPrompt, setShowPrompt] = useState(false);
 
-  const handleFieldChange = (field: 'src' | 'alt' | 'caption', value: string) => {
+  const handleFieldChange = (
+    field: "src" | "alt" | "caption",
+    value: string,
+  ) => {
     if (!onChange) return;
     onChange({
-      src: field === 'src' ? value : src,
-      alt: field === 'alt' ? value : alt,
-      caption: field === 'caption' ? value : caption,
+      src: field === "src" ? value : src,
+      alt: field === "alt" ? value : alt,
+      caption: field === "caption" ? value : caption,
     });
   };
 
@@ -52,7 +61,7 @@ export function ImageBlock({ src, alt, caption, isEditable = false, onChange }: 
                   type="text"
                   placeholder="Paste URL"
                   value={src}
-                  onChange={(e) => handleFieldChange('src', e.target.value)}
+                  onChange={(e) => handleFieldChange("src", e.target.value)}
                 />
               </div>
               <div className="prompt-field">
@@ -61,12 +70,12 @@ export function ImageBlock({ src, alt, caption, isEditable = false, onChange }: 
                   type="text"
                   placeholder="Alt text"
                   value={alt}
-                  onChange={(e) => handleFieldChange('alt', e.target.value)}
+                  onChange={(e) => handleFieldChange("alt", e.target.value)}
                 />
               </div>
-              <button 
+              <button
                 type="button"
-                onClick={() => setShowPrompt(false)} 
+                onClick={() => setShowPrompt(false)}
                 className="image-block-prompt-close"
               >
                 Close
@@ -81,13 +90,17 @@ export function ImageBlock({ src, alt, caption, isEditable = false, onChange }: 
       {isEditable ? (
         <input
           type="text"
-          value={caption || ''}
-          onChange={(e) => handleFieldChange('caption', e.target.value)}
+          value={caption || ""}
+          onChange={(e) => handleFieldChange("caption", e.target.value)}
           className="image-block-caption-input"
           placeholder="Add an optional caption..."
         />
       ) : (
-        caption && <figcaption className="image-block-caption">{parseInlineMarkdown(caption)}</figcaption>
+        caption && (
+          <figcaption className="image-block-caption">
+            {parseInlineMarkdown(caption)}
+          </figcaption>
+        )
       )}
     </div>
   );

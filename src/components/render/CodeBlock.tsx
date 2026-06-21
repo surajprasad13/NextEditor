@@ -1,11 +1,29 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const LANGUAGES = [
-  'javascript', 'typescript', 'jsx', 'tsx', 'python', 'css', 'html',
-  'json', 'bash', 'shell', 'sql', 'go', 'rust', 'java', 'php',
-  'ruby', 'swift', 'kotlin', 'yaml', 'markdown', 'text',
+  "javascript",
+  "typescript",
+  "jsx",
+  "tsx",
+  "python",
+  "css",
+  "html",
+  "json",
+  "bash",
+  "shell",
+  "sql",
+  "go",
+  "rust",
+  "java",
+  "php",
+  "ruby",
+  "swift",
+  "kotlin",
+  "yaml",
+  "markdown",
+  "text",
 ];
 
 interface CodeBlockProps {
@@ -18,9 +36,9 @@ interface CodeBlockProps {
 }
 
 export function CodeBlock({
-  language = 'javascript',
-  code = '',
-  filename = '',
+  language = "javascript",
+  code = "",
+  filename = "",
   showLineNumbers = true,
   isEditable = false,
   onChange,
@@ -103,7 +121,7 @@ export function CodeBlock({
     );
   }
 
-  const lines = code.split('\n');
+  const lines = code.split("\n");
 
   return (
     <div className="code-block-container">
@@ -115,7 +133,7 @@ export function CodeBlock({
         </div>
         <span className="code-block-filename">{filename || language}</span>
         <button type="button" onClick={handleCopy} className="code-copy-btn">
-          {copied ? '✓ Copied!' : 'Copy'}
+          {copied ? "✓ Copied!" : "Copy"}
         </button>
       </div>
       <div className="code-block-body">

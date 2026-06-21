@@ -1,28 +1,39 @@
-import React from 'react';
-import { getPageBySlug } from '@/lib/db';
-import { parseMarkdownToNodes } from '@/lib/parser';
-import { Accordion } from '@/components/render/Accordion';
-import { Card } from '@/components/render/Card';
-import { ImageBlock } from '@/components/render/ImageBlock';
-import { TestimonialRow } from '@/components/render/TestimonialRow';
-import { HeroBlock } from '@/components/render/HeroBlock';
-import { CalloutBlock } from '@/components/render/CalloutBlock';
-import { StatsBlock } from '@/components/render/StatsBlock';
-import { CodeBlock } from '@/components/render/CodeBlock';
-import { ButtonBlock } from '@/components/render/ButtonBlock';
-import { DividerBlock } from '@/components/render/DividerBlock';
-import { NavBlock } from '@/components/render/NavBlock';
-import { FooterBlock } from '@/components/render/FooterBlock';
-import { ColumnsBlock } from '@/components/render/ColumnsBlock';
-import { PricingBlock } from '@/components/render/PricingBlock';
-import { TextBlock } from '@/components/render/TextBlock';
-import { EmbedBlock } from '@/components/render/EmbedBlock';
-import { MarkdownTextRenderer } from '@/components/render/MarkdownTextRenderer';
-import { Sparkles, Edit, ArrowRight, Sliders, Database, Layout, Clock, Calendar, Tag, User } from 'lucide-react';
-import LinkComponent from 'next/link';
+import React from "react";
+import { getPageBySlug } from "@/lib/db";
+import { parseMarkdownToNodes } from "@/lib/parser";
+import { Accordion } from "@/components/render/Accordion";
+import { Card } from "@/components/render/Card";
+import { ImageBlock } from "@/components/render/ImageBlock";
+import { TestimonialRow } from "@/components/render/TestimonialRow";
+import { HeroBlock } from "@/components/render/HeroBlock";
+import { CalloutBlock } from "@/components/render/CalloutBlock";
+import { StatsBlock } from "@/components/render/StatsBlock";
+import { CodeBlock } from "@/components/render/CodeBlock";
+import { ButtonBlock } from "@/components/render/ButtonBlock";
+import { DividerBlock } from "@/components/render/DividerBlock";
+import { NavBlock } from "@/components/render/NavBlock";
+import { FooterBlock } from "@/components/render/FooterBlock";
+import { ColumnsBlock } from "@/components/render/ColumnsBlock";
+import { PricingBlock } from "@/components/render/PricingBlock";
+import { TextBlock } from "@/components/render/TextBlock";
+import { EmbedBlock } from "@/components/render/EmbedBlock";
+import { MarkdownTextRenderer } from "@/components/render/MarkdownTextRenderer";
+import {
+  Sparkles,
+  Edit,
+  ArrowRight,
+  Sliders,
+  Database,
+  Layout,
+  Clock,
+  Calendar,
+  Tag,
+  User,
+} from "lucide-react";
+import LinkComponent from "next/link";
 
 const parseSpacing = (val: any) => {
-  if (val === undefined || val === '') return undefined;
+  if (val === undefined || val === "") return undefined;
   if (/^\d+$/.test(val.toString().trim())) return `${val}px`;
   return val;
 };
@@ -33,31 +44,34 @@ interface DynamicPageProps {
 
 export async function generateMetadata({ params }: DynamicPageProps) {
   const { path } = await params;
-  const slug = '/' + (path?.join('/') || '');
+  const slug = "/" + (path?.join("/") || "");
   const page = await getPageBySlug(slug);
 
-  if (!page && slug === '/') {
+  if (!page && slug === "/") {
     return {
-      title: 'NextEditor - Visual Markdown Blog & Page Builder',
-      description: 'Design dynamic visual web layouts in Markdown with real-time drag-and-drop and inline editing.',
-      openGraph: { title: 'NextEditor', type: 'website' as const },
+      title: "NextEditor - Visual Markdown Blog & Page Builder",
+      description:
+        "Design dynamic visual web layouts in Markdown with real-time drag-and-drop and inline editing.",
+      openGraph: { title: "NextEditor", type: "website" as const },
     };
   }
 
-  const isPublic = page && page.status !== 'draft';
+  const isPublic = page && page.status !== "draft";
   if (!isPublic) {
-    return { title: 'Page Not Found' };
+    return { title: "Page Not Found" };
   }
 
-  const description = page.excerpt || `${page.type === 'blog' ? 'Blog post' : 'Page'}: ${page.title}`;
+  const description =
+    page.excerpt ||
+    `${page.type === "blog" ? "Blog post" : "Page"}: ${page.title}`;
   return {
-    title: `${page.title}${page.type !== 'blog' ? ' — NextEditor' : ''}`,
+    title: `${page.title}${page.type !== "blog" ? " — NextEditor" : ""}`,
     description,
     authors: page.author ? [{ name: page.author }] : undefined,
     openGraph: {
       title: page.title,
       description,
-      type: page.type === 'blog' ? 'article' as const : 'website' as const,
+      type: page.type === "blog" ? ("article" as const) : ("website" as const),
       images: page.featuredImage ? [{ url: page.featuredImage }] : [],
     },
   };
@@ -67,14 +81,19 @@ export async function generateMetadata({ params }: DynamicPageProps) {
 //  Unified component renderer
 // ─────────────────────────────────────────────────────────────────────────────
 function renderNode(node: ReturnType<typeof parseMarkdownToNodes>[0]) {
-  if (node.type === 'markdown') {
+  if (node.type === "markdown") {
     return (
-      <section 
-        key={node.id} 
+      <section
+        key={node.id}
         className="static-section markdown-section"
-        style={{ width: '100%', flex: '0 0 100%', maxWidth: '100%', boxSizing: 'border-box' }}
+        style={{
+          width: "100%",
+          flex: "0 0 100%",
+          maxWidth: "100%",
+          boxSizing: "border-box",
+        }}
       >
-        <MarkdownTextRenderer content={node.content || ''} isEditable={false} />
+        <MarkdownTextRenderer content={node.content || ""} isEditable={false} />
       </section>
     );
   }
@@ -85,117 +104,204 @@ function renderNode(node: ReturnType<typeof parseMarkdownToNodes>[0]) {
     const styleObj: React.CSSProperties = {};
     if (styleSettings.bgColor) styleObj.backgroundColor = styleSettings.bgColor;
     if (styleSettings.textColor) styleObj.color = styleSettings.textColor;
-    if (styleSettings.contentAlign) styleObj.textAlign = styleSettings.contentAlign;
+    if (styleSettings.contentAlign)
+      styleObj.textAlign = styleSettings.contentAlign;
 
-    if (styleSettings.paddingTop !== undefined && styleSettings.paddingTop !== '') styleObj.paddingTop = parseSpacing(styleSettings.paddingTop);
-    if (styleSettings.paddingBottom !== undefined && styleSettings.paddingBottom !== '') styleObj.paddingBottom = parseSpacing(styleSettings.paddingBottom);
-    if (styleSettings.paddingLeft !== undefined && styleSettings.paddingLeft !== '') styleObj.paddingLeft = parseSpacing(styleSettings.paddingLeft);
-    if (styleSettings.paddingRight !== undefined && styleSettings.paddingRight !== '') styleObj.paddingRight = parseSpacing(styleSettings.paddingRight);
+    if (
+      styleSettings.paddingTop !== undefined &&
+      styleSettings.paddingTop !== ""
+    )
+      styleObj.paddingTop = parseSpacing(styleSettings.paddingTop);
+    if (
+      styleSettings.paddingBottom !== undefined &&
+      styleSettings.paddingBottom !== ""
+    )
+      styleObj.paddingBottom = parseSpacing(styleSettings.paddingBottom);
+    if (
+      styleSettings.paddingLeft !== undefined &&
+      styleSettings.paddingLeft !== ""
+    )
+      styleObj.paddingLeft = parseSpacing(styleSettings.paddingLeft);
+    if (
+      styleSettings.paddingRight !== undefined &&
+      styleSettings.paddingRight !== ""
+    )
+      styleObj.paddingRight = parseSpacing(styleSettings.paddingRight);
 
-    if (styleSettings.marginTop !== undefined && styleSettings.marginTop !== '') styleObj.marginTop = parseSpacing(styleSettings.marginTop);
-    if (styleSettings.marginBottom !== undefined && styleSettings.marginBottom !== '') styleObj.marginBottom = parseSpacing(styleSettings.marginBottom);
-    if (styleSettings.marginLeft !== undefined && styleSettings.marginLeft !== '') styleObj.marginLeft = parseSpacing(styleSettings.marginLeft);
-    if (styleSettings.marginRight !== undefined && styleSettings.marginRight !== '') styleObj.marginRight = parseSpacing(styleSettings.marginRight);
+    if (styleSettings.marginTop !== undefined && styleSettings.marginTop !== "")
+      styleObj.marginTop = parseSpacing(styleSettings.marginTop);
+    if (
+      styleSettings.marginBottom !== undefined &&
+      styleSettings.marginBottom !== ""
+    )
+      styleObj.marginBottom = parseSpacing(styleSettings.marginBottom);
+    if (
+      styleSettings.marginLeft !== undefined &&
+      styleSettings.marginLeft !== ""
+    )
+      styleObj.marginLeft = parseSpacing(styleSettings.marginLeft);
+    if (
+      styleSettings.marginRight !== undefined &&
+      styleSettings.marginRight !== ""
+    )
+      styleObj.marginRight = parseSpacing(styleSettings.marginRight);
 
-    if (styleSettings.borderRadius !== undefined && styleSettings.borderRadius !== '') styleObj.borderRadius = parseSpacing(styleSettings.borderRadius);
-    if (styleSettings.borderWidth !== undefined && styleSettings.borderWidth !== '') {
+    if (
+      styleSettings.borderRadius !== undefined &&
+      styleSettings.borderRadius !== ""
+    )
+      styleObj.borderRadius = parseSpacing(styleSettings.borderRadius);
+    if (
+      styleSettings.borderWidth !== undefined &&
+      styleSettings.borderWidth !== ""
+    ) {
       styleObj.borderWidth = parseSpacing(styleSettings.borderWidth);
-      styleObj.borderStyle = styleSettings.borderStyle || 'solid';
-      if (styleSettings.borderColor) styleObj.borderColor = styleSettings.borderColor;
+      styleObj.borderStyle = styleSettings.borderStyle || "solid";
+      if (styleSettings.borderColor)
+        styleObj.borderColor = styleSettings.borderColor;
     }
 
-    if (styleSettings.boxShadow === 'sm') {
-      styleObj.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-    } else if (styleSettings.boxShadow === 'md') {
-      styleObj.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.04)';
-    } else if (styleSettings.boxShadow === 'lg') {
-      styleObj.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)';
+    if (styleSettings.boxShadow === "sm") {
+      styleObj.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";
+    } else if (styleSettings.boxShadow === "md") {
+      styleObj.boxShadow =
+        "0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.04)";
+    } else if (styleSettings.boxShadow === "lg") {
+      styleObj.boxShadow =
+        "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)";
     }
 
     if (styleSettings.fontFamily) {
-      if (styleSettings.fontFamily === 'sans') styleObj.fontFamily = 'var(--font-sans, inherit)';
-      else if (styleSettings.fontFamily === 'serif') styleObj.fontFamily = 'var(--font-serif, "Playfair Display", serif)';
-      else if (styleSettings.fontFamily === 'mono') styleObj.fontFamily = 'var(--font-mono, monospace)';
-      else if (styleSettings.fontFamily === 'system') styleObj.fontFamily = 'system-ui, -apple-system, sans-serif';
+      if (styleSettings.fontFamily === "sans")
+        styleObj.fontFamily = "var(--font-sans, inherit)";
+      else if (styleSettings.fontFamily === "serif")
+        styleObj.fontFamily = 'var(--font-serif, "Playfair Display", serif)';
+      else if (styleSettings.fontFamily === "mono")
+        styleObj.fontFamily = "var(--font-mono, monospace)";
+      else if (styleSettings.fontFamily === "system")
+        styleObj.fontFamily = "system-ui, -apple-system, sans-serif";
     }
-    if (styleSettings.fontSize !== undefined && styleSettings.fontSize !== '') styleObj.fontSize = parseSpacing(styleSettings.fontSize);
-    if (styleSettings.fontWeight) styleObj.fontWeight = styleSettings.fontWeight;
-    if (styleSettings.letterSpacing !== undefined && styleSettings.letterSpacing !== '') styleObj.letterSpacing = parseSpacing(styleSettings.letterSpacing);
+    if (styleSettings.fontSize !== undefined && styleSettings.fontSize !== "")
+      styleObj.fontSize = parseSpacing(styleSettings.fontSize);
+    if (styleSettings.fontWeight)
+      styleObj.fontWeight = styleSettings.fontWeight;
+    if (
+      styleSettings.letterSpacing !== undefined &&
+      styleSettings.letterSpacing !== ""
+    )
+      styleObj.letterSpacing = parseSpacing(styleSettings.letterSpacing);
 
     if (styleSettings.bgGradient) {
       styleObj.backgroundImage = `linear-gradient(${styleSettings.bgGradient})`;
     }
     if (styleSettings.bgImage) {
-      const overlay = styleSettings.bgOverlay !== undefined && styleSettings.bgOverlay !== '' ? parseFloat(styleSettings.bgOverlay) : 0;
+      const overlay =
+        styleSettings.bgOverlay !== undefined && styleSettings.bgOverlay !== ""
+          ? parseFloat(styleSettings.bgOverlay)
+          : 0;
       if (overlay > 0) {
         styleObj.backgroundImage = `linear-gradient(rgba(0, 0, 0, ${overlay}), rgba(0, 0, 0, ${overlay})), url(${styleSettings.bgImage})`;
       } else {
         styleObj.backgroundImage = `url(${styleSettings.bgImage})`;
       }
-      styleObj.backgroundSize = 'cover';
-      styleObj.backgroundPosition = 'center';
-      styleObj.backgroundRepeat = 'no-repeat';
+      styleObj.backgroundSize = "cover";
+      styleObj.backgroundPosition = "center";
+      styleObj.backgroundRepeat = "no-repeat";
     }
 
-    if (styleSettings.maxWidth === 'wide') {
-      styleObj.maxWidth = '1200px';
-      styleObj.marginLeft = 'auto';
-      styleObj.marginRight = 'auto';
-    } else if (styleSettings.maxWidth === 'narrow') {
-      styleObj.maxWidth = '600px';
-      styleObj.marginLeft = 'auto';
-      styleObj.marginRight = 'auto';
-    } else if (styleSettings.maxWidth === 'custom' && styleSettings.customMaxWidth !== undefined && styleSettings.customMaxWidth !== '') {
+    if (styleSettings.maxWidth === "wide") {
+      styleObj.maxWidth = "1200px";
+      styleObj.marginLeft = "auto";
+      styleObj.marginRight = "auto";
+    } else if (styleSettings.maxWidth === "narrow") {
+      styleObj.maxWidth = "600px";
+      styleObj.marginLeft = "auto";
+      styleObj.marginRight = "auto";
+    } else if (
+      styleSettings.maxWidth === "custom" &&
+      styleSettings.customMaxWidth !== undefined &&
+      styleSettings.customMaxWidth !== ""
+    ) {
       styleObj.maxWidth = `${styleSettings.customMaxWidth}px`;
-      styleObj.marginLeft = 'auto';
-      styleObj.marginRight = 'auto';
+      styleObj.marginLeft = "auto";
+      styleObj.marginRight = "auto";
     }
 
     return styleObj;
   };
 
-  const hasCustomStyles = styleSettings.customCss || (styleSettings.hoverEffect && styleSettings.hoverEffect !== 'none');
+  const hasCustomStyles =
+    styleSettings.customCss ||
+    (styleSettings.hoverEffect && styleSettings.hoverEffect !== "none");
   const customCssBlock = hasCustomStyles ? (
-    <style dangerouslySetInnerHTML={{
-      __html: `
+    <style
+      dangerouslySetInnerHTML={{
+        __html: `
         #static-node-inner-${node.id} {
-          ${styleSettings.hoverEffect && styleSettings.hoverEffect !== 'none' ? `transition: all ${styleSettings.transitionSpeed || '0.3s'} ease-in-out;` : ''}
-          ${styleSettings.customCss || ''}
+          ${
+            styleSettings.hoverEffect && styleSettings.hoverEffect !== "none"
+              ? `transition: all ${
+                  styleSettings.transitionSpeed || "0.3s"
+                } ease-in-out;`
+              : ""
+          }
+          ${styleSettings.customCss || ""}
         }
-        ${styleSettings.hoverEffect === 'scale' ? `#static-node-inner-${node.id}:hover { transform: scale(1.03); }` : ''}
-        ${styleSettings.hoverEffect === 'float' ? `#static-node-inner-${node.id}:hover { transform: translateY(-6px); }` : ''}
-        ${styleSettings.hoverEffect === 'shadow' ? `#static-node-inner-${node.id}:hover { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04) !important; }` : ''}
-        ${styleSettings.hoverEffect === 'border-glow' ? `#static-node-inner-${node.id}:hover { border-color: var(--accent, #6366f1) !important; box-shadow: 0 0 12px rgba(99, 102, 241, 0.4) !important; }` : ''}
-      `
-    }} />
+        ${
+          styleSettings.hoverEffect === "scale"
+            ? `#static-node-inner-${node.id}:hover { transform: scale(1.03); }`
+            : ""
+        }
+        ${
+          styleSettings.hoverEffect === "float"
+            ? `#static-node-inner-${node.id}:hover { transform: translateY(-6px); }`
+            : ""
+        }
+        ${
+          styleSettings.hoverEffect === "shadow"
+            ? `#static-node-inner-${node.id}:hover { box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04) !important; }`
+            : ""
+        }
+        ${
+          styleSettings.hoverEffect === "border-glow"
+            ? `#static-node-inner-${node.id}:hover { border-color: var(--accent, #6366f1) !important; box-shadow: 0 0 12px rgba(99, 102, 241, 0.4) !important; }`
+            : ""
+        }
+      `,
+      }}
+    />
   ) : null;
 
-  const blockWidth = styleSettings.blockWidth || '100';
-  const verticalAlign = styleSettings.verticalAlign || 'stretch';
-  
+  const blockWidth = styleSettings.blockWidth || "100";
+  const verticalAlign = styleSettings.verticalAlign || "stretch";
+
   const outerStyle: React.CSSProperties = {
     width: `${blockWidth}%`,
     flex: `0 0 ${blockWidth}%`,
     maxWidth: `${blockWidth}%`,
-    boxSizing: 'border-box',
-    alignSelf: verticalAlign === 'stretch' ? 'stretch' : verticalAlign,
+    boxSizing: "border-box",
+    alignSelf: verticalAlign === "stretch" ? "stretch" : verticalAlign,
   };
-  if (blockWidth !== '100') {
-    outerStyle.padding = '8px';
+  if (blockWidth !== "100") {
+    outerStyle.padding = "8px";
   }
 
   return (
-    <section key={node.id} className="static-section component-section" style={outerStyle}>
-      <div 
+    <section
+      key={node.id}
+      className="static-section component-section"
+      style={outerStyle}
+    >
+      <div
         id={`static-node-inner-${node.id}`}
-        className={`block-style-wrapper ${styleSettings.customClass || ''}`}
+        className={`block-style-wrapper ${styleSettings.customClass || ""}`}
         style={compileContainerStyle()}
       >
         {customCssBlock}
-        {node.componentType === 'Accordion' && (
+        {node.componentType === "Accordion" && (
           <Accordion items={node.props.items} isEditable={false} />
         )}
-        {node.componentType === 'Card' && (
+        {node.componentType === "Card" && (
           <Card
             title={node.props.title}
             description={node.props.description}
@@ -203,7 +309,7 @@ function renderNode(node: ReturnType<typeof parseMarkdownToNodes>[0]) {
             isEditable={false}
           />
         )}
-        {node.componentType === 'ImageBlock' && (
+        {node.componentType === "ImageBlock" && (
           <ImageBlock
             src={node.props.src}
             alt={node.props.alt}
@@ -211,10 +317,13 @@ function renderNode(node: ReturnType<typeof parseMarkdownToNodes>[0]) {
             isEditable={false}
           />
         )}
-        {node.componentType === 'TestimonialRow' && (
-          <TestimonialRow testimonials={node.props.testimonials} isEditable={false} />
+        {node.componentType === "TestimonialRow" && (
+          <TestimonialRow
+            testimonials={node.props.testimonials}
+            isEditable={false}
+          />
         )}
-        {node.componentType === 'HeroBlock' && (
+        {node.componentType === "HeroBlock" && (
           <HeroBlock
             title={node.props.title}
             subtitle={node.props.subtitle}
@@ -227,7 +336,7 @@ function renderNode(node: ReturnType<typeof parseMarkdownToNodes>[0]) {
             isEditable={false}
           />
         )}
-        {node.componentType === 'CalloutBlock' && (
+        {node.componentType === "CalloutBlock" && (
           <CalloutBlock
             variant={node.props.variant}
             title={node.props.title}
@@ -235,7 +344,7 @@ function renderNode(node: ReturnType<typeof parseMarkdownToNodes>[0]) {
             isEditable={false}
           />
         )}
-        {node.componentType === 'StatsBlock' && (
+        {node.componentType === "StatsBlock" && (
           <StatsBlock
             title={node.props.title}
             subtitle={node.props.subtitle}
@@ -243,7 +352,7 @@ function renderNode(node: ReturnType<typeof parseMarkdownToNodes>[0]) {
             isEditable={false}
           />
         )}
-        {node.componentType === 'CodeBlock' && (
+        {node.componentType === "CodeBlock" && (
           <CodeBlock
             language={node.props.language}
             code={node.props.code}
@@ -252,7 +361,7 @@ function renderNode(node: ReturnType<typeof parseMarkdownToNodes>[0]) {
             isEditable={false}
           />
         )}
-        {node.componentType === 'ButtonBlock' && (
+        {node.componentType === "ButtonBlock" && (
           <ButtonBlock
             label={node.props.label}
             url={node.props.url}
@@ -264,7 +373,7 @@ function renderNode(node: ReturnType<typeof parseMarkdownToNodes>[0]) {
             isEditable={false}
           />
         )}
-        {node.componentType === 'DividerBlock' && (
+        {node.componentType === "DividerBlock" && (
           <DividerBlock
             style={node.props.style}
             weight={node.props.weight}
@@ -273,7 +382,7 @@ function renderNode(node: ReturnType<typeof parseMarkdownToNodes>[0]) {
             isEditable={false}
           />
         )}
-        {node.componentType === 'NavBlock' && (
+        {node.componentType === "NavBlock" && (
           <NavBlock
             logoText={node.props.logoText}
             logoUrl={node.props.logoUrl}
@@ -284,7 +393,7 @@ function renderNode(node: ReturnType<typeof parseMarkdownToNodes>[0]) {
             isEditable={false}
           />
         )}
-        {node.componentType === 'FooterBlock' && (
+        {node.componentType === "FooterBlock" && (
           <FooterBlock
             logoText={node.props.logoText}
             copyrightText={node.props.copyrightText}
@@ -293,7 +402,7 @@ function renderNode(node: ReturnType<typeof parseMarkdownToNodes>[0]) {
             isEditable={false}
           />
         )}
-        {node.componentType === 'ColumnsBlock' && (
+        {node.componentType === "ColumnsBlock" && (
           <ColumnsBlock
             layout={node.props.layout}
             gap={node.props.gap}
@@ -302,7 +411,7 @@ function renderNode(node: ReturnType<typeof parseMarkdownToNodes>[0]) {
             isEditable={false}
           />
         )}
-        {node.componentType === 'PricingBlock' && (
+        {node.componentType === "PricingBlock" && (
           <PricingBlock
             title={node.props.title}
             subtitle={node.props.subtitle}
@@ -310,17 +419,11 @@ function renderNode(node: ReturnType<typeof parseMarkdownToNodes>[0]) {
             isEditable={false}
           />
         )}
-        {node.componentType === 'TextBlock' && (
-          <TextBlock
-            content={node.props.content}
-            isEditable={false}
-          />
+        {node.componentType === "TextBlock" && (
+          <TextBlock content={node.props.content} isEditable={false} />
         )}
-        {node.componentType === 'EmbedBlock' && (
-          <EmbedBlock
-            html={node.props.html}
-            isEditable={false}
-          />
+        {node.componentType === "EmbedBlock" && (
+          <EmbedBlock html={node.props.html} isEditable={false} />
         )}
       </div>
     </section>
@@ -332,12 +435,12 @@ function renderNode(node: ReturnType<typeof parseMarkdownToNodes>[0]) {
 // ─────────────────────────────────────────────────────────────────────────────
 export default async function Page({ params }: DynamicPageProps) {
   const { path } = await params;
-  const slug = '/' + (path?.join('/') || '');
+  const slug = "/" + (path?.join("/") || "");
   const page = await getPageBySlug(slug);
-  const isPublic = page && page.status !== 'draft';
+  const isPublic = page && page.status !== "draft";
 
   // ── Homepage landing ───────────────────────────────────────────────────────
-  if (!isPublic && slug === '/') {
+  if (!isPublic && slug === "/") {
     return (
       <div className="landing-page-wrapper">
         <header className="landing-header">
@@ -347,7 +450,9 @@ export default async function Page({ params }: DynamicPageProps) {
               <span>NextEditor</span>
             </div>
             <nav className="landing-nav">
-              <LinkComponent href="/docs" className="landing-nav-btn">Launch Editor</LinkComponent>
+              <LinkComponent href="/docs" className="landing-nav-btn">
+                Launch Editor
+              </LinkComponent>
             </nav>
           </div>
         </header>
@@ -358,10 +463,15 @@ export default async function Page({ params }: DynamicPageProps) {
               <Sparkles size={12} />
               <span>Visual Markdown CMS + Blog Engine</span>
             </div>
-            <h1>A Visual Page Builder<br />Designed for Blogs.</h1>
+            <h1>
+              A Visual Page Builder
+              <br />
+              Designed for Blogs.
+            </h1>
             <p>
-              Write in Markdown, design with drag-and-drop component blocks, publish with full
-              SEO metadata. NextEditor combines a real markdown editor with a blog CMS.
+              Write in Markdown, design with drag-and-drop component blocks,
+              publish with full SEO metadata. NextEditor combines a real
+              markdown editor with a blog CMS.
             </p>
             <div className="hero-ctas">
               <LinkComponent href="/docs" className="btn-hero-primary">
@@ -377,14 +487,33 @@ export default async function Page({ params }: DynamicPageProps) {
         <section className="landing-features">
           <div className="section-header">
             <h2>Everything a blog needs</h2>
-            <p>From markdown authoring to full blog post metadata — all in one editor.</p>
+            <p>
+              From markdown authoring to full blog post metadata — all in one
+              editor.
+            </p>
           </div>
           <div className="features-grid">
             {[
-              { icon: <Layout size={20} />, title: '10+ Visual Blocks', desc: 'Hero, Accordion, Stats, Code, Button, Callout, Divider and more.' },
-              { icon: <Edit size={20} />, title: 'Rich Markdown Parser', desc: '**bold**, *italic*, ==highlight==, ^sup^, tables, alerts, task lists and footnotes.' },
-              { icon: <Sliders size={20} />, title: 'Full Blog Metadata', desc: 'Author, date, tags, category, featured image, excerpt — all managed in the editor.' },
-              { icon: <Database size={20} />, title: 'Zero-Config DB', desc: 'File-based JSON database. No servers, no migrations, no setup.' },
+              {
+                icon: <Layout size={20} />,
+                title: "10+ Visual Blocks",
+                desc: "Hero, Accordion, Stats, Code, Button, Callout, Divider and more.",
+              },
+              {
+                icon: <Edit size={20} />,
+                title: "Rich Markdown Parser",
+                desc: "**bold**, *italic*, ==highlight==, ^sup^, tables, alerts, task lists and footnotes.",
+              },
+              {
+                icon: <Sliders size={20} />,
+                title: "Full Blog Metadata",
+                desc: "Author, date, tags, category, featured image, excerpt — all managed in the editor.",
+              },
+              {
+                icon: <Database size={20} />,
+                title: "Zero-Config DB",
+                desc: "File-based JSON database. No servers, no migrations, no setup.",
+              },
             ].map((f, i) => (
               <div key={i} className="feature-card">
                 <div className="feature-icon-wrapper">{f.icon}</div>
@@ -397,8 +526,13 @@ export default async function Page({ params }: DynamicPageProps) {
 
         <footer className="landing-footer">
           <div className="footer-inner">
-            <p>© {new Date().getFullYear()} NextEditor. Built with Next.js & Vanilla CSS.</p>
-            <LinkComponent href="/docs" className="footer-edit-link">Enter Visual Editor →</LinkComponent>
+            <p>
+              © {new Date().getFullYear()} NextEditor. Built with Next.js &
+              Vanilla CSS.
+            </p>
+            <LinkComponent href="/docs" className="footer-edit-link">
+              Enter Visual Editor →
+            </LinkComponent>
           </div>
         </footer>
       </div>
@@ -412,7 +546,10 @@ export default async function Page({ params }: DynamicPageProps) {
         <div className="not-found-card">
           <Sparkles className="icon-pulse" size={48} />
           <h1>404 — Page Not Found</h1>
-          <p>The page at <code>{slug}</code> does not exist or hasn't been published.</p>
+          <p>
+            The page at <code>{slug}</code> does not exist or hasn't been
+            published.
+          </p>
           <div className="not-found-actions">
             <LinkComponent href="/docs" className="btn-primary">
               <Edit size={16} /> Open Visual Editor
@@ -424,27 +561,37 @@ export default async function Page({ params }: DynamicPageProps) {
   }
 
   const nodes = parseMarkdownToNodes(page.markdown);
-  const isBlog = page.type === 'blog';
+  const isBlog = page.type === "blog";
 
   const formattedDate = page.date
-    ? new Date(page.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    ? new Date(page.date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
     : null;
 
   if (!isBlog) {
     return (
-      <div className="static-page-layout custom-page-layout" style={{ backgroundColor: 'var(--bg-app)', minHeight: '100vh' }}>
-        <main className="static-page-content custom-page-content" style={{ padding: 0 }}>
-          <div 
-            className="static-content-container custom-content-container" 
-            style={{ 
-              maxWidth: '100%', 
-              margin: 0, 
+      <div
+        className="static-page-layout custom-page-layout"
+        style={{ backgroundColor: "var(--bg-app)", minHeight: "100vh" }}
+      >
+        <main
+          className="static-page-content custom-page-content"
+          style={{ padding: 0 }}
+        >
+          <div
+            className="static-content-container custom-content-container"
+            style={{
+              maxWidth: "100%",
+              margin: 0,
               padding: 0,
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignContent: 'flex-start',
-              width: '100%',
-              boxSizing: 'border-box'
+              display: "flex",
+              flexWrap: "wrap",
+              alignContent: "flex-start",
+              width: "100%",
+              boxSizing: "border-box",
             }}
           >
             {nodes.map((node) => renderNode(node))}
@@ -452,28 +599,35 @@ export default async function Page({ params }: DynamicPageProps) {
         </main>
 
         {/* Premium Glassmorphic Floating Edit Button */}
-        <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 1000 }}>
-          <LinkComponent 
-            href="/docs" 
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '8px', 
-              padding: '10px 18px', 
-              borderRadius: '30px', 
-              backgroundColor: 'rgba(15, 23, 42, 0.85)', 
-              backdropFilter: 'blur(10px)', 
-              border: '1px solid rgba(255, 255, 255, 0.1)', 
-              color: '#ffffff', 
-              fontSize: '0.8rem', 
-              fontWeight: 600, 
-              textDecoration: 'none', 
-              boxShadow: '0 8px 30px rgba(0,0,0,0.2)', 
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+        <div
+          style={{
+            position: "fixed",
+            bottom: "24px",
+            right: "24px",
+            zIndex: 1000,
+          }}
+        >
+          <LinkComponent
+            href="/docs"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "10px 18px",
+              borderRadius: "30px",
+              backgroundColor: "rgba(15, 23, 42, 0.85)",
+              backdropFilter: "blur(10px)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              color: "#ffffff",
+              fontSize: "0.8rem",
+              fontWeight: 600,
+              textDecoration: "none",
+              boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
             className="floating-edit-pill"
           >
-            <Edit size={14} style={{ color: 'var(--accent, #6366f1)' }} />
+            <Edit size={14} style={{ color: "var(--accent, #6366f1)" }} />
             <span>Edit Layout</span>
           </LinkComponent>
         </div>
@@ -499,7 +653,6 @@ export default async function Page({ params }: DynamicPageProps) {
 
       <main className="static-page-content">
         <div className={`static-content-container blog-content-container`}>
-
           {/* Blog post header */}
           <div className="blog-post-header">
             {/* Category badge */}
@@ -532,7 +685,11 @@ export default async function Page({ params }: DynamicPageProps) {
               {page.author && (
                 <div className="blog-author-chip">
                   {page.authorImage ? (
-                    <img src={page.authorImage} alt={page.author} className="blog-author-avatar" />
+                    <img
+                      src={page.authorImage}
+                      alt={page.author}
+                      className="blog-author-avatar"
+                    />
                   ) : (
                     <span className="blog-author-avatar-placeholder">
                       <User size={14} />
@@ -560,7 +717,9 @@ export default async function Page({ params }: DynamicPageProps) {
               <div className="blog-tags-row">
                 <Tag size={13} />
                 {page.tags.map((tag) => (
-                  <span key={tag} className="blog-tag-chip">{tag}</span>
+                  <span key={tag} className="blog-tag-chip">
+                    {tag}
+                  </span>
                 ))}
               </div>
             )}
@@ -575,12 +734,20 @@ export default async function Page({ params }: DynamicPageProps) {
           {page.author && (
             <div className="blog-author-card">
               {page.authorImage ? (
-                <img src={page.authorImage} alt={page.author} className="blog-author-card-avatar" />
+                <img
+                  src={page.authorImage}
+                  alt={page.author}
+                  className="blog-author-card-avatar"
+                />
               ) : (
-                <div className="blog-author-card-placeholder"><User size={28} /></div>
+                <div className="blog-author-card-placeholder">
+                  <User size={28} />
+                </div>
               )}
               <div className="blog-author-card-body">
-                <div className="blog-author-card-name">Written by {page.author}</div>
+                <div className="blog-author-card-name">
+                  Written by {page.author}
+                </div>
                 {page.authorBio && (
                   <p className="blog-author-card-bio">{page.authorBio}</p>
                 )}

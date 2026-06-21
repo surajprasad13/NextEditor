@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Check } from 'lucide-react';
+import React from "react";
+import { Check } from "lucide-react";
 
 interface PlanItem {
   name: string;
@@ -26,8 +26,8 @@ interface PricingBlockProps {
 }
 
 export function PricingBlock({
-  title = 'Simple, Transparent Plans',
-  subtitle = 'Scale up or down anytime.',
+  title = "Simple, Transparent Plans",
+  subtitle = "Scale up or down anytime.",
   plans = [],
   isEditable = false,
   onChange,
@@ -43,7 +43,11 @@ export function PricingBlock({
   };
 
   return (
-    <div className={`builder-pricing-section ${isEditable ? 'pricing-editable' : ''}`}>
+    <div
+      className={`builder-pricing-section ${
+        isEditable ? "pricing-editable" : ""
+      }`}
+    >
       <div className="pricing-header">
         <h2 className="pricing-title">
           {isEditable ? (
@@ -79,8 +83,15 @@ export function PricingBlock({
 
       <div className="pricing-grid">
         {plans.map((plan, idx) => (
-          <div key={idx} className={`pricing-card ${plan.popular ? 'pricing-card-popular' : ''}`}>
-            {plan.popular && <span className="pricing-badge">Popular Choice</span>}
+          <div
+            key={idx}
+            className={`pricing-card ${
+              plan.popular ? "pricing-card-popular" : ""
+            }`}
+          >
+            {plan.popular && (
+              <span className="pricing-badge">Popular Choice</span>
+            )}
             <div className="pricing-card-header">
               <h4 className="plan-name">
                 {isEditable ? (

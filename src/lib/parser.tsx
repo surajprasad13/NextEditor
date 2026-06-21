@@ -1,8 +1,8 @@
-import React from 'react';
+import React from "react";
 
 export interface EditorNode {
   id: string;
-  type: 'markdown' | 'component';
+  type: "markdown" | "component";
   componentType?: string;
   content?: string;
   props?: any;
@@ -14,28 +14,28 @@ export interface EditorNode {
 export function parseMarkdownToNodes(markdown: string): EditorNode[] {
   if (!markdown) return [];
 
-  const lines = markdown.split('\n');
+  const lines = markdown.split("\n");
   const nodes: EditorNode[] = [];
   let currentMarkdownLines: string[] = [];
   let inComponent = false;
-  let componentType = '';
+  let componentType = "";
   let componentJsonLines: string[] = [];
   let nodeIndex = 0;
 
   const flushMarkdown = () => {
-    const text = currentMarkdownLines.join('\n').trim();
+    const text = currentMarkdownLines.join("\n").trim();
     if (text) {
       nodes.push({
         id: `node-${nodeIndex++}`,
-        type: 'markdown',
-        content: currentMarkdownLines.join('\n'),
+        type: "markdown",
+        content: currentMarkdownLines.join("\n"),
       });
     }
     currentMarkdownLines = [];
   };
 
   for (const line of lines) {
-    if (line.trim().startsWith(':::')) {
+    if (line.trim().startsWith(":::")) {
       if (!inComponent) {
         flushMarkdown();
         inComponent = true;
@@ -44,14 +44,24 @@ export function parseMarkdownToNodes(markdown: string): EditorNode[] {
       } else {
         inComponent = false;
         try {
-          const props = JSON.parse(componentJsonLines.join('\n').trim() || '{}');
-          nodes.push({ id: `node-${nodeIndex++}`, type: 'component', componentType, props });
+          const props = JSON.parse(
+            componentJsonLines.join("\n").trim() || "{}",
+          );
+          nodes.push({
+            id: `node-${nodeIndex++}`,
+            type: "component",
+            componentType,
+            props,
+          });
         } catch {
           nodes.push({
             id: `node-${nodeIndex++}`,
-            type: 'component',
+            type: "component",
             componentType,
-            props: { error: 'Invalid JSON', rawText: componentJsonLines.join('\n') },
+            props: {
+              error: "Invalid JSON",
+              rawText: componentJsonLines.join("\n"),
+            },
           });
         }
       }
@@ -71,12 +81,12 @@ export function parseMarkdownToNodes(markdown: string): EditorNode[] {
 export function nodesToMarkdown(nodes: EditorNode[]): string {
   return nodes
     .map((n) =>
-      n.type === 'markdown'
-        ? (n.content ?? '')
-        : `:::${n.componentType}\n${JSON.stringify(n.props, null, 2)}\n:::`
+      n.type === "markdown"
+        ? n.content ?? ""
+        : `:::${n.componentType}\n${JSON.stringify(n.props, null, 2)}\n:::`,
     )
-    .join('\n\n')
-    .replace(/\n{3,}/g, '\n\n');
+    .join("\n\n")
+    .replace(/\n{3,}/g, "\n\n");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -96,55 +106,69 @@ const PATTERNS: Array<{
 }> = [
   // Bold-Italic: ***text***
   {
-    name: 'bolditalic',
+    name: "bolditalic",
     re: /\*{3}([^*]+?)\*{3}/,
-    render: (m, k) => <strong key={k}><em>{parseInlineMarkdown(m[1])}</em></strong>,
+    render: (m, k) => (
+      <strong key={k}>
+        <em>{parseInlineMarkdown(m[1])}</em>
+      </strong>
+    ),
   },
   // Bold: **text** or __text__
   {
-    name: 'bold',
+    name: "bold",
     re: /\*{2}([^*]+?)\*{2}|__([^_]+?)__/,
-    render: (m, k) => <strong key={k}>{parseInlineMarkdown(m[1] ?? m[2])}</strong>,
+    render: (m, k) => (
+      <strong key={k}>{parseInlineMarkdown(m[1] ?? m[2])}</strong>
+    ),
   },
   // Italic: *text* or _text_
   {
-    name: 'italic',
+    name: "italic",
     re: /\*([^*]+?)\*|(?<![a-zA-Z0-9])_([^_]+?)_(?![a-zA-Z0-9])/,
     render: (m, k) => <em key={k}>{parseInlineMarkdown(m[1] ?? m[2])}</em>,
   },
   // Strikethrough: ~~text~~
   {
-    name: 'strike',
+    name: "strike",
     re: /~~([^~]+?)~~/,
     render: (m, k) => <del key={k}>{parseInlineMarkdown(m[1])}</del>,
   },
   // Highlight: ==text==
   {
-    name: 'highlight',
+    name: "highlight",
     re: /==([^=]+?)==/,
-    render: (m, k) => <mark key={k} className="inline-highlight">{m[1]}</mark>,
+    render: (m, k) => (
+      <mark key={k} className="inline-highlight">
+        {m[1]}
+      </mark>
+    ),
   },
   // Superscript: ^text^
   {
-    name: 'sup',
+    name: "sup",
     re: /\^([^^\n]+?)\^/,
     render: (m, k) => <sup key={k}>{m[1]}</sup>,
   },
   // Subscript: ~text~ (single tilde, not inside ~~)
   {
-    name: 'sub',
+    name: "sub",
     re: /(?<!~)~([^~\n]+?)~(?!~)/,
     render: (m, k) => <sub key={k}>{m[1]}</sub>,
   },
   // Inline code: `text`
   {
-    name: 'code',
+    name: "code",
     re: /`([^`]+?)`/,
-    render: (m, k) => <code key={k} className="inline-code-badge">{m[1]}</code>,
+    render: (m, k) => (
+      <code key={k} className="inline-code-badge">
+        {m[1]}
+      </code>
+    ),
   },
   // Inline image: ![alt](url "title"?)
   {
-    name: 'image',
+    name: "image",
     re: /!\[([^\]]*?)\]\(([^)\s]+?)(?:\s+"([^"]*)")?\)/,
     render: (m, k) => (
       <img
@@ -159,7 +183,7 @@ const PATTERNS: Array<{
   },
   // Link: [text](url "title"?)
   {
-    name: 'link',
+    name: "link",
     re: /\[([^\]]+?)\]\(([^)\s]+?)(?:\s+"([^"]*)")?\)/,
     render: (m, k) => (
       <a
@@ -167,8 +191,8 @@ const PATTERNS: Array<{
         href={m[2]}
         title={m[3]}
         className="preview-inline-link"
-        target={m[2].startsWith('http') ? '_blank' : undefined}
-        rel={m[2].startsWith('http') ? 'noopener noreferrer' : undefined}
+        target={m[2].startsWith("http") ? "_blank" : undefined}
+        rel={m[2].startsWith("http") ? "noopener noreferrer" : undefined}
       >
         {parseInlineMarkdown(m[1])}
       </a>
@@ -176,7 +200,7 @@ const PATTERNS: Array<{
   },
   // Auto-link: bare https?:// URL
   {
-    name: 'autolink',
+    name: "autolink",
     re: /https?:\/\/[^\s<>"')\]]+/,
     render: (m, k) => (
       <a
@@ -201,8 +225,8 @@ export function parseInlineMarkdown(text: string): React.ReactNode {
   if (!text) return null;
 
   // Handle explicit line-break: two spaces + newline
-  if (text.includes('\n')) {
-    const parts = text.split('\n');
+  if (text.includes("\n")) {
+    const parts = text.split("\n");
     const nodes: React.ReactNode[] = [];
     parts.forEach((part, i) => {
       nodes.push(parseInlineMarkdown(part));
@@ -222,11 +246,15 @@ export function parseInlineMarkdown(text: string): React.ReactNode {
   const segments: React.ReactNode[] = [];
 
   while (remaining.length > 0) {
-    let earliest: { index: number; match: RegExpExecArray; pattern: typeof PATTERNS[0] } | null = null;
+    let earliest: {
+      index: number;
+      match: RegExpExecArray;
+      pattern: (typeof PATTERNS)[0];
+    } | null = null;
 
     for (const pattern of PATTERNS) {
       // Use exec on remaining string (anchored-equivalent by tracking offset)
-      const re = new RegExp(pattern.re.source, 'u');
+      const re = new RegExp(pattern.re.source, "u");
       const m = re.exec(remaining);
       if (m !== null) {
         if (earliest === null || m.index < earliest.index) {

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-type HeroVariant = 'gradient' | 'light' | 'dark' | 'minimal';
+type HeroVariant = "gradient" | "light" | "dark" | "minimal";
 
 interface HeroBlockProps {
   title?: string;
@@ -18,14 +18,14 @@ interface HeroBlockProps {
 }
 
 export function HeroBlock({
-  title = 'Build Something Amazing',
-  subtitle = 'A modern visual editor powered by Markdown and React.',
-  badgeText = '✨ New Release',
-  ctaText = 'Get Started',
-  ctaUrl = '#',
-  secondaryText = 'Learn More',
-  secondaryUrl = '#',
-  variant = 'gradient',
+  title = "Build Something Amazing",
+  subtitle = "A modern visual editor powered by Markdown and React.",
+  badgeText = "✨ New Release",
+  ctaText = "Get Started",
+  ctaUrl = "#",
+  secondaryText = "Learn More",
+  secondaryUrl = "#",
+  variant = "gradient",
   isEditable = false,
   onChange,
 }: HeroBlockProps) {
@@ -58,16 +58,20 @@ export function HeroBlock({
         <div className="editor-form-field">
           <label>Style Variant</label>
           <div className="variant-picker">
-            {(['gradient', 'light', 'dark', 'minimal'] as HeroVariant[]).map((v) => (
-              <button
-                key={v}
-                type="button"
-                className={`variant-pick-btn ${localVariant === v ? 'active' : ''}`}
-                onClick={() => setLocalVariant(v)}
-              >
-                {v}
-              </button>
-            ))}
+            {(["gradient", "light", "dark", "minimal"] as HeroVariant[]).map(
+              (v) => (
+                <button
+                  key={v}
+                  type="button"
+                  className={`variant-pick-btn ${
+                    localVariant === v ? "active" : ""
+                  }`}
+                  onClick={() => setLocalVariant(v)}
+                >
+                  {v}
+                </button>
+              ),
+            )}
           </div>
         </div>
         <div className="editor-form-field">
@@ -138,7 +142,11 @@ export function HeroBlock({
             />
           </div>
         </div>
-        <button type="button" className="block-form-apply-btn" onClick={handleApply}>
+        <button
+          type="button"
+          className="block-form-apply-btn"
+          onClick={handleApply}
+        >
           ✓ Apply Changes
         </button>
       </div>

@@ -1,10 +1,16 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success';
-type ButtonSize = 'sm' | 'md' | 'lg' | 'xl';
-type ButtonAlign = 'left' | 'center' | 'right' | 'full';
+type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "danger"
+  | "success";
+type ButtonSize = "sm" | "md" | "lg" | "xl";
+type ButtonAlign = "left" | "center" | "right" | "full";
 
 interface ButtonBlockProps {
   label?: string;
@@ -19,12 +25,12 @@ interface ButtonBlockProps {
 }
 
 export function ButtonBlock({
-  label = 'Click Here',
-  url = '#',
-  variant = 'primary',
-  size = 'md',
-  align = 'center',
-  icon = '',
+  label = "Click Here",
+  url = "#",
+  variant = "primary",
+  size = "md",
+  align = "center",
+  icon = "",
   openNewTab = false,
   isEditable = false,
   onChange,
@@ -60,7 +66,7 @@ export function ButtonBlock({
               placeholder="/page or https://..."
             />
           </div>
-          <div className="editor-form-field" style={{ maxWidth: '80px' }}>
+          <div className="editor-form-field" style={{ maxWidth: "80px" }}>
             <label>Icon / Emoji</label>
             <input
               value={localIcon}
@@ -79,7 +85,14 @@ export function ButtonBlock({
               onChange={(e) => setLocalVariant(e.target.value as ButtonVariant)}
               className="editor-form-select"
             >
-              {['primary', 'secondary', 'outline', 'ghost', 'danger', 'success'].map((v) => (
+              {[
+                "primary",
+                "secondary",
+                "outline",
+                "ghost",
+                "danger",
+                "success",
+              ].map((v) => (
                 <option key={v} value={v}>
                   {v}
                 </option>
@@ -93,7 +106,7 @@ export function ButtonBlock({
               onChange={(e) => setLocalSize(e.target.value as ButtonSize)}
               className="editor-form-select"
             >
-              {['sm', 'md', 'lg', 'xl'].map((s) => (
+              {["sm", "md", "lg", "xl"].map((s) => (
                 <option key={s} value={s}>
                   {s}
                 </option>
@@ -107,7 +120,7 @@ export function ButtonBlock({
               onChange={(e) => setLocalAlign(e.target.value as ButtonAlign)}
               className="editor-form-select"
             >
-              {['left', 'center', 'right', 'full'].map((a) => (
+              {["left", "center", "right", "full"].map((a) => (
                 <option key={a} value={a}>
                   {a}
                 </option>
@@ -149,8 +162,8 @@ export function ButtonBlock({
       <a
         href={url}
         className={`btn-block btn-block--${variant} btn-block--${size}`}
-        target={openNewTab ? '_blank' : undefined}
-        rel={openNewTab ? 'noopener noreferrer' : undefined}
+        target={openNewTab ? "_blank" : undefined}
+        rel={openNewTab ? "noopener noreferrer" : undefined}
       >
         {icon && <span className="btn-block-icon">{icon}</span>}
         {label}

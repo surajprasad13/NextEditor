@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { ChevronDown, Plus, Trash2 } from 'lucide-react';
-import { parseInlineMarkdown } from '@/lib/parser';
+import { useState } from "react";
+import { ChevronDown, Plus, Trash2 } from "lucide-react";
+import { parseInlineMarkdown } from "@/lib/parser";
 
 interface AccordionItem {
   title: string;
@@ -15,14 +15,22 @@ interface AccordionProps {
   onChange?: (props: { items: AccordionItem[] }) => void;
 }
 
-export function Accordion({ items = [], isEditable = false, onChange }: AccordionProps) {
+export function Accordion({
+  items = [],
+  isEditable = false,
+  onChange,
+}: AccordionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggleItem = (idx: number) => {
     setOpenIndex(openIndex === idx ? null : idx);
   };
 
-  const handleItemChange = (idx: number, field: 'title' | 'content', value: string) => {
+  const handleItemChange = (
+    idx: number,
+    field: "title" | "content",
+    value: string,
+  ) => {
     if (!onChange) return;
     const newItems = items.map((item, i) => {
       if (i === idx) {
@@ -36,7 +44,10 @@ export function Accordion({ items = [], isEditable = false, onChange }: Accordio
   const addItem = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!onChange) return;
-    const newItems = [...items, { title: 'New Question', content: 'New Answer content here...' }];
+    const newItems = [
+      ...items,
+      { title: "New Question", content: "New Answer content here..." },
+    ];
     onChange({ items: newItems });
     setOpenIndex(newItems.length - 1);
   };
@@ -58,19 +69,23 @@ export function Accordion({ items = [], isEditable = false, onChange }: Accordio
       {items.map((item, idx) => {
         const isOpen = openIndex === idx;
         return (
-          <div key={idx} className={`accordion-item ${isOpen ? 'open' : ''}`}>
+          <div key={idx} className={`accordion-item ${isOpen ? "open" : ""}`}>
             <div className="accordion-trigger" onClick={() => toggleItem(idx)}>
               {isEditable ? (
                 <input
                   type="text"
                   value={item.title}
                   onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => handleItemChange(idx, 'title', e.target.value)}
+                  onChange={(e) =>
+                    handleItemChange(idx, "title", e.target.value)
+                  }
                   className="accordion-title-input"
                   placeholder="Accordion Question"
                 />
               ) : (
-                <span className="accordion-title-text">{parseInlineMarkdown(item.title)}</span>
+                <span className="accordion-title-text">
+                  {parseInlineMarkdown(item.title)}
+                </span>
               )}
               <div className="accordion-actions">
                 {isEditable && items.length > 1 && (
@@ -86,18 +101,22 @@ export function Accordion({ items = [], isEditable = false, onChange }: Accordio
                 <ChevronDown className="accordion-chevron" size={18} />
               </div>
             </div>
-            
+
             <div className="accordion-content">
               {isEditable ? (
                 <textarea
                   value={item.content}
-                  onChange={(e) => handleItemChange(idx, 'content', e.target.value)}
+                  onChange={(e) =>
+                    handleItemChange(idx, "content", e.target.value)
+                  }
                   className="accordion-content-input"
                   placeholder="Accordion Answer content..."
                   rows={3}
                 />
               ) : (
-                <div className="accordion-content-text">{parseInlineMarkdown(item.content)}</div>
+                <div className="accordion-content-text">
+                  {parseInlineMarkdown(item.content)}
+                </div>
               )}
             </div>
           </div>

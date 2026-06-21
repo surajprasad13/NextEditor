@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Plus, Trash2, User } from 'lucide-react';
-import { parseInlineMarkdown } from '@/lib/parser';
+import { useState } from "react";
+import { Plus, Trash2, User } from "lucide-react";
+import { parseInlineMarkdown } from "@/lib/parser";
 
 interface TestimonialItem {
   name: string;
@@ -16,10 +16,20 @@ interface TestimonialRowProps {
   onChange?: (props: { testimonials: TestimonialItem[] }) => void;
 }
 
-export function TestimonialRow({ testimonials = [], isEditable = false, onChange }: TestimonialRowProps) {
-  const [activeAvatarPrompt, setActiveAvatarPrompt] = useState<number | null>(null);
+export function TestimonialRow({
+  testimonials = [],
+  isEditable = false,
+  onChange,
+}: TestimonialRowProps) {
+  const [activeAvatarPrompt, setActiveAvatarPrompt] = useState<number | null>(
+    null,
+  );
 
-  const handleTestimonialChange = (idx: number, field: keyof TestimonialItem, value: string) => {
+  const handleTestimonialChange = (
+    idx: number,
+    field: keyof TestimonialItem,
+    value: string,
+  ) => {
     if (!onChange) return;
     const newTestimonials = testimonials.map((t, i) => {
       if (i === idx) {
@@ -35,9 +45,10 @@ export function TestimonialRow({ testimonials = [], isEditable = false, onChange
     const newTestimonials = [
       ...testimonials,
       {
-        name: 'Jane Doe',
-        text: 'This is a fantastic product! Highly recommended to everyone.',
-        image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop',
+        name: "Jane Doe",
+        text: "This is a fantastic product! Highly recommended to everyone.",
+        image:
+          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
       },
     ];
     onChange({ testimonials: newTestimonials });
@@ -72,7 +83,11 @@ export function TestimonialRow({ testimonials = [], isEditable = false, onChange
 
             <div className="testimonial-avatar-wrapper">
               {t.image ? (
-                <img src={t.image} alt={t.name} className="testimonial-avatar" />
+                <img
+                  src={t.image}
+                  alt={t.name}
+                  className="testimonial-avatar"
+                />
               ) : (
                 <div className="testimonial-avatar-placeholder">
                   <User size={20} />
@@ -81,7 +96,11 @@ export function TestimonialRow({ testimonials = [], isEditable = false, onChange
               {isEditable && (
                 <button
                   type="button"
-                  onClick={() => setActiveAvatarPrompt(activeAvatarPrompt === idx ? null : idx)}
+                  onClick={() =>
+                    setActiveAvatarPrompt(
+                      activeAvatarPrompt === idx ? null : idx,
+                    )
+                  }
                   className="testimonial-avatar-edit-btn"
                 >
                   Edit Image
@@ -94,7 +113,9 @@ export function TestimonialRow({ testimonials = [], isEditable = false, onChange
                     type="text"
                     placeholder="Avatar URL"
                     value={t.image}
-                    onChange={(e) => handleTestimonialChange(idx, 'image', e.target.value)}
+                    onChange={(e) =>
+                      handleTestimonialChange(idx, "image", e.target.value)
+                    }
                     className="avatar-url-input"
                   />
                   <button
@@ -112,25 +133,33 @@ export function TestimonialRow({ testimonials = [], isEditable = false, onChange
               {isEditable ? (
                 <textarea
                   value={t.text}
-                  onChange={(e) => handleTestimonialChange(idx, 'text', e.target.value)}
+                  onChange={(e) =>
+                    handleTestimonialChange(idx, "text", e.target.value)
+                  }
                   className="testimonial-text-input"
                   placeholder="Testimonial text..."
                   rows={3}
                 />
               ) : (
-                <p className="testimonial-text">"{parseInlineMarkdown(t.text)}"</p>
+                <p className="testimonial-text">
+                  "{parseInlineMarkdown(t.text)}"
+                </p>
               )}
 
               {isEditable ? (
                 <input
                   type="text"
                   value={t.name}
-                  onChange={(e) => handleTestimonialChange(idx, 'name', e.target.value)}
+                  onChange={(e) =>
+                    handleTestimonialChange(idx, "name", e.target.value)
+                  }
                   className="testimonial-name-input"
                   placeholder="Customer Name"
                 />
               ) : (
-                <span className="testimonial-name">— {parseInlineMarkdown(t.name)}</span>
+                <span className="testimonial-name">
+                  — {parseInlineMarkdown(t.name)}
+                </span>
               )}
             </div>
           </div>

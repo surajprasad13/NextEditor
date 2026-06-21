@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Menu, X } from 'lucide-react';
+import React from "react";
+import { Menu, X } from "lucide-react";
 
 interface LinkItem {
   label: string;
@@ -27,8 +27,8 @@ interface NavBlockProps {
 }
 
 export function NavBlock({
-  logoText = 'NextEditor',
-  logoUrl = '/',
+  logoText = "NextEditor",
+  logoUrl = "/",
   links = [],
   ctaLabel,
   ctaUrl,
@@ -52,7 +52,11 @@ export function NavBlock({
   };
 
   return (
-    <header className={`builder-nav-header ${sticky ? 'nav-sticky' : ''} ${isEditable ? 'nav-editable' : ''}`}>
+    <header
+      className={`builder-nav-header ${sticky ? "nav-sticky" : ""} ${
+        isEditable ? "nav-editable" : ""
+      }`}
+    >
       <div className="nav-container">
         {/* Logo */}
         <div className="nav-logo">
@@ -73,11 +77,14 @@ export function NavBlock({
         </div>
 
         {/* Links */}
-        <nav className={`nav-menu ${mobileMenuOpen ? 'mobile-active' : ''}`}>
+        <nav className={`nav-menu ${mobileMenuOpen ? "mobile-active" : ""}`}>
           {links.map((link, idx) => (
             <span key={idx} className="nav-item-wrap">
               {isEditable ? (
-                <div className="nav-item-inline-edit" onClick={(e) => e.stopPropagation()}>
+                <div
+                  className="nav-item-inline-edit"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <input
                     type="text"
                     value={link.label}
@@ -116,21 +123,25 @@ export function NavBlock({
                 <div className="nav-cta-inline-edit">
                   <input
                     type="text"
-                    value={ctaLabel || ''}
-                    onChange={(e) => update({ ctaLabel: e.target.value || undefined })}
+                    value={ctaLabel || ""}
+                    onChange={(e) =>
+                      update({ ctaLabel: e.target.value || undefined })
+                    }
                     className="nav-cta-input"
                     placeholder="CTA Button Label"
                   />
                   <input
                     type="text"
-                    value={ctaUrl || ''}
-                    onChange={(e) => update({ ctaUrl: e.target.value || undefined })}
+                    value={ctaUrl || ""}
+                    onChange={(e) =>
+                      update({ ctaUrl: e.target.value || undefined })
+                    }
                     className="nav-cta-input-url"
                     placeholder="CTA URL"
                   />
                 </div>
               ) : (
-                <a href={ctaUrl || '#'} className="nav-cta-btn">
+                <a href={ctaUrl || "#"} className="nav-cta-btn">
                   {ctaLabel}
                 </a>
               )}

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { VisualEditor } from '@/components/editor/VisualEditor';
+import React from "react";
+import { VisualEditor } from "@/components/editor/VisualEditor";
 
 export default function DocsPage() {
   return (

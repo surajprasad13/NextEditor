@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-type CalloutVariant = 'info' | 'success' | 'warning' | 'danger' | 'tip';
+type CalloutVariant = "info" | "success" | "warning" | "danger" | "tip";
 
 interface CalloutBlockProps {
   variant?: CalloutVariant;
@@ -13,25 +13,25 @@ interface CalloutBlockProps {
 }
 
 const CALLOUT_ICONS: Record<CalloutVariant, string> = {
-  info: 'ℹ️',
-  success: '✅',
-  warning: '⚠️',
-  danger: '🚨',
-  tip: '💡',
+  info: "ℹ️",
+  success: "✅",
+  warning: "⚠️",
+  danger: "🚨",
+  tip: "💡",
 };
 
 const CALLOUT_LABELS: Record<CalloutVariant, string> = {
-  info: 'Info',
-  success: 'Success',
-  warning: 'Warning',
-  danger: 'Danger',
-  tip: 'Tip',
+  info: "Info",
+  success: "Success",
+  warning: "Warning",
+  danger: "Danger",
+  tip: "Tip",
 };
 
 export function CalloutBlock({
-  variant = 'info',
-  title = '',
-  message = 'Your callout message here.',
+  variant = "info",
+  title = "",
+  message = "Your callout message here.",
   isEditable = false,
   onChange,
 }: CalloutBlockProps) {
@@ -46,11 +46,21 @@ export function CalloutBlock({
         <div className="editor-form-field">
           <label>Callout Type</label>
           <div className="callout-type-picker">
-            {(['info', 'success', 'warning', 'danger', 'tip'] as CalloutVariant[]).map((v) => (
+            {(
+              [
+                "info",
+                "success",
+                "warning",
+                "danger",
+                "tip",
+              ] as CalloutVariant[]
+            ).map((v) => (
               <button
                 key={v}
                 type="button"
-                className={`callout-type-btn callout-type-btn--${v} ${localVariant === v ? 'active' : ''}`}
+                className={`callout-type-btn callout-type-btn--${v} ${
+                  localVariant === v ? "active" : ""
+                }`}
                 onClick={() => setLocalVariant(v)}
               >
                 <span>{CALLOUT_ICONS[v]}</span>
@@ -81,7 +91,13 @@ export function CalloutBlock({
         <button
           type="button"
           className="block-form-apply-btn"
-          onClick={() => onChange?.({ variant: localVariant, title: localTitle, message: localMessage })}
+          onClick={() =>
+            onChange?.({
+              variant: localVariant,
+              title: localTitle,
+              message: localMessage,
+            })
+          }
         >
           ✓ Apply Changes
         </button>

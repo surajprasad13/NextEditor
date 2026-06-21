@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 interface StatItem {
   value: string;
@@ -18,12 +18,12 @@ interface StatsBlockProps {
 }
 
 export function StatsBlock({
-  title = '',
-  subtitle = '',
+  title = "",
+  subtitle = "",
   stats = [
-    { value: '10K', label: 'Happy Customers', suffix: '+' },
-    { value: '99.9', label: 'Uptime Guarantee', suffix: '%' },
-    { value: '24', label: 'Support Hours', suffix: '/7' },
+    { value: "10K", label: "Happy Customers", suffix: "+" },
+    { value: "99.9", label: "Uptime Guarantee", suffix: "%" },
+    { value: "24", label: "Support Hours", suffix: "/7" },
   ],
   isEditable = false,
   onChange,
@@ -33,12 +33,17 @@ export function StatsBlock({
   const [localStats, setLocalStats] = useState<StatItem[]>(stats);
 
   const updateStat = (idx: number, field: keyof StatItem, value: string) => {
-    const updated = localStats.map((s, i) => (i === idx ? { ...s, [field]: value } : s));
+    const updated = localStats.map((s, i) =>
+      i === idx ? { ...s, [field]: value } : s,
+    );
     setLocalStats(updated);
   };
 
   const addStat = () =>
-    setLocalStats([...localStats, { value: '100', label: 'New Metric', suffix: '+' }]);
+    setLocalStats([
+      ...localStats,
+      { value: "100", label: "New Metric", suffix: "+" },
+    ]);
 
   const removeStat = (idx: number) =>
     setLocalStats(localStats.filter((_, i) => i !== idx));
@@ -73,38 +78,42 @@ export function StatsBlock({
               <div className="stat-editor-row-label">Stat {idx + 1}</div>
               <div className="stat-editor-fields">
                 <input
-                  value={stat.prefix || ''}
-                  onChange={(e) => updateStat(idx, 'prefix', e.target.value)}
+                  value={stat.prefix || ""}
+                  onChange={(e) => updateStat(idx, "prefix", e.target.value)}
                   className="editor-form-input"
                   placeholder="$"
-                  style={{ width: '56px' }}
+                  style={{ width: "56px" }}
                   title="Prefix"
                 />
                 <input
                   value={stat.value}
-                  onChange={(e) => updateStat(idx, 'value', e.target.value)}
+                  onChange={(e) => updateStat(idx, "value", e.target.value)}
                   className="editor-form-input"
                   placeholder="100"
                   style={{ flex: 1 }}
                   title="Value"
                 />
                 <input
-                  value={stat.suffix || ''}
-                  onChange={(e) => updateStat(idx, 'suffix', e.target.value)}
+                  value={stat.suffix || ""}
+                  onChange={(e) => updateStat(idx, "suffix", e.target.value)}
                   className="editor-form-input"
                   placeholder="+%"
-                  style={{ width: '56px' }}
+                  style={{ width: "56px" }}
                   title="Suffix"
                 />
                 <input
                   value={stat.label}
-                  onChange={(e) => updateStat(idx, 'label', e.target.value)}
+                  onChange={(e) => updateStat(idx, "label", e.target.value)}
                   className="editor-form-input"
                   placeholder="Label"
                   style={{ flex: 2 }}
                   title="Label"
                 />
-                <button type="button" onClick={() => removeStat(idx)} className="stat-remove-btn">
+                <button
+                  type="button"
+                  onClick={() => removeStat(idx)}
+                  className="stat-remove-btn"
+                >
                   ✕
                 </button>
               </div>
@@ -117,7 +126,13 @@ export function StatsBlock({
         <button
           type="button"
           className="block-form-apply-btn"
-          onClick={() => onChange?.({ title: localTitle, subtitle: localSubtitle, stats: localStats })}
+          onClick={() =>
+            onChange?.({
+              title: localTitle,
+              subtitle: localSubtitle,
+              stats: localStats,
+            })
+          }
         >
           ✓ Apply Changes
         </button>

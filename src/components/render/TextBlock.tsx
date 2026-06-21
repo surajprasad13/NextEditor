@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { MarkdownTextRenderer } from './MarkdownTextRenderer';
+import React from "react";
+import { MarkdownTextRenderer } from "./MarkdownTextRenderer";
 
 interface TextBlockProps {
   content: string;
@@ -9,9 +9,17 @@ interface TextBlockProps {
   onChange?: (props: { content: string }) => void;
 }
 
-export function TextBlock({ content, isEditable = false, onChange }: TextBlockProps) {
+export function TextBlock({
+  content,
+  isEditable = false,
+  onChange,
+}: TextBlockProps) {
   return (
-    <div className={`enhanced-text-block ${isEditable ? 'text-block-editable' : ''}`}>
+    <div
+      className={`enhanced-text-block ${
+        isEditable ? "text-block-editable" : ""
+      }`}
+    >
       {isEditable ? (
         <textarea
           className="text-block-inline-textarea"
