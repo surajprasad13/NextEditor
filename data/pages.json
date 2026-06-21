@@ -1,0 +1,56 @@
+[
+  {
+    "slug": "/welcome",
+    "title": "Welcome to NextEditor",
+    "markdown": "\n| one town| Column 2 | Column 3 |\n|----------|----------|----------|\n| Cell 1   | Cell 2   | Cell 3   |\n| Cell 4   | Cell 5   | Cell 6   |\n\n# Welcome to ***NextEditor***!\n\nThis is a live preview of your visual markdown page. You can click on components on the right to edit their text inline, drag them to rearrange their order, or click buttons on the toolbar to add new components.\n\n## Custom Features\n\n:::HeroBlock\n{\n  \"title\": \"Build Something Amazing\",\n  \"subtitle\": \"A modern visual editor powered by Markdown and React. Start crafting beautiful pages today.\",\n  \"badgeText\": \"✨ New Release\",\n  \"ctaText\": \"Get Started\",\n  \"ctaUrl\": \"#\",\n  \"secondaryText\": \"Learn More\",\n  \"secondaryUrl\": \"#\",\n  \"variant\": \"minimal\",\n  \"customStyles\": {\n    \"bgOverlay\": 0.4,\n    \"bgImage\": \"https://www.mamp.one/wp-content/uploads/2024/09/image-resources2.jpg\",\n    \"bgGradient\": \"40\",\n    \"fontFamily\": \"mono\",\n    \"fontSize\": 12,\n    \"borderRadius\": 12,\n    \"boxShadow\": \"lg\"\n  }\n}\n:::\n\n:::Accordion\n{\n  \"items\": [\n    {\n      \"title\": \"What is **NextEditor**?\",\n      \"content\": \"NextEditor is a visual markdown page builder that compiles rich component structures in real-time.\"\n    },\n    {\n      \"title\": \"How do I edit visual components?\",\n      \"content\": \"Just click edit on any component block, or edit the markdown text directly on the left.\"\n    },\n    {\n      \"title\": \"New Question\",\n      \"content\": \"New Answer content here...![https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkwXm19M2koCHaripKSjPBOU84bbVTdx-gxbiA_lbVU3-Uc7wKbmitaKli&s=10](image-url)  \"\n    }\n  ]\n}\n:::\n\n:::Card\n{\n  \"title\": \"Drag-and-Drop Reordering\",\n  \"description\": \"Rearrange components in the preview panel, and watch the markdown code update automatically.\",\n  \"image\": \"https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=500&auto=format&fit=crop\"\n}\n:::\n\n:::TestimonialRow\n{\n  \"error\": \"Invalid JSON\",\n  \"rawText\": \"{\\n  \\\"testimonials\\\": [\\n    {\\n      \\\"name\\\": \\\"Sarah Connor\\\",\\n      \\\"text\\\": \\\"This editor makes managing landing pages and docs extremely easy!\\\",\\n      \\\"image\\\": \\\"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop\\\"\\n    },\\n    {\\n      \\\"name\\\": \\\"Marcus **Wright**\\\",\"\n}\n:::\n\n{\n  \"testimonials\": [\n    {\n      \"name\": \"Danny Rand\",\n      \"text\": \"This visual editor feels extremely fluid. Highly recommended!\",\n      \"image\": \"https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop\"\n    }\n  ]\n}\n\n:::\n{\n  \"error\": \"Invalid JSON\",\n  \"rawText\": \"\\n      \\\"text\\\": \\\"The zero-config file DB and interactive live preview worked right out of the box.\\\",\\n      \\\"image\\\": \\\"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop\\\"\\n    }\\n  ]\\n}\"\n}\n:::\n\n****\n\n:::ColumnsBlock\n{\n  \"layout\": \"1-1\",\n  \"gap\": \"sm\",\n  \"align\": \"top\",\n  \"columns\": [\n    {\n      \"type\": \"custom\",\n      \"iconEmoji\": \"\",\n      \"title\": \"Premium Design Out-of-the-box\",\n      \"content\": \"Add titles, text, buttons, and custom layout badges to any grid column.\",\n      \"btnLabel\": \"Get Started Today\",\n      \"btnUrl\": \"#\",\n      \"btnVariant\": \"primary\",\n      \"bgColor\": \"var(--bg-app)\",\n      \"borderRadius\": 8,\n      \"borderWidth\": 1,\n      \"borderColor\": \"var(--border-color)\",\n      \"boxShadow\": \"sm\"\n    },\n    {\n      \"type\": \"custom\",\n      \"content\": \"### Column\\nNew column content.\",\n      \"title\": \"title\"\n    }\n  ],\n  \"customStyles\": {\n    \"blockWidth\": \"100\",\n    \"verticalAlign\": \"center\"\n  }\n}\n:::\n\n:::PricingBlock\n{\n  \"title\": \"Simple, Transparent Plans\",\n  \"subtitle\": \"No hidden fees. Scale as your business grows.\",\n  \"plans\": [\n    {\n      \"name\": \"Starter Plan\",\n      \"price\": \"$0\",\n      \"period\": \"mo\",\n      \"features\": [\n        \"1 Editor User\",\n        \"Core block formats\",\n        \"Static exports\",\n        \"Community support\"\n      ],\n      \"ctaText\": \"Start for Free\",\n      \"ctaUrl\": \"#\",\n      \"popular\": false\n    },\n    {\n      \"name\": \"Professional Pro\",\n      \"price\": \"$29\",\n      \"period\": \"mo\",\n      \"features\": [\n        \"Unlimited Users\",\n        \"All 15+ Block types\",\n        \"Dynamic database entries\",\n        \"24/7 dedicated email support\",\n        \"Custom style modules\"\n      ],\n      \"ctaText\": \"Upgrade to Pro\",\n      \"ctaUrl\": \"#\",\n      \"popular\": true\n    }\n  ]\n}\n:::\n\n:::HeroBlock\n{\n  \"title\": \"Build Something Amazing\",\n  \"subtitle\": \"A modern visual editor powered by Markdown and React. Start crafting beautiful pages today.\",\n  \"badgeText\": \"✨ New Release\",\n  \"ctaText\": \"Get Started\",\n  \"ctaUrl\": \"#\",\n  \"secondaryText\": \"Learn More\",\n  \"secondaryUrl\": \"#\",\n  \"variant\": \"gradient\"\n}\n:::",
+    "status": "published",
+    "createdAt": "2026-06-19T05:59:21.815Z",
+    "updatedAt": "2026-06-19T09:06:27.718Z",
+    "type": "page",
+    "readingTime": 3,
+    "updatedDate": "2026-06-19T09:06:27.718Z",
+    "tags": []
+  },
+  {
+    "slug": "/new-page",
+    "title": "New Page Title",
+    "markdown": "# New Page\n\nWrite something interesting here...\n\n## New **### Sectisjdsjfskjon**\n\nEdit this markdown text block directly.\n\n:::Accordion\n{\n  \"items\": [\n    {\n      \"title\": \"How does NextEditor work?\",\n      \"content\": \"NextEditor parses standard Markdown along with custom blocks wrapped in ::: tags.\"\n    },\n    {\n      \"title\": \"Can I add custom CSS?\",\n      \"content\": \"Yes! The entire project runs on native responsive Vanilla CSS.\"\n    },\n    {\n      \"title\": \"New Question\",\n      \"content\": \"New Answer content here...\"\n    }\n  ]\n}\n:::",
+    "status": "published",
+    "createdAt": "2026-06-19T06:03:11.869Z",
+    "updatedAt": "2026-06-19T06:27:11.864Z",
+    "type": "page"
+  },
+  {
+    "slug": "/qa",
+    "title": "QA Section",
+    "markdown": "# QA Section\n\nWrite your visual markdown content here...\n\n:::Card\n{\n  \"title\": \"Premium Design ***Out-of-the-box***\",\n  \"description\": \"Our CSS modules use smooth *gradients*, high-contrast layouts, and sleek font families.\",\n  \"image\": \"https://www.copahost.com/blog/wp-content/uploads/2019/07/imgsize2.png\"\n}\n:::\n",
+    "status": "published",
+    "createdAt": "2026-06-19T06:31:42.606Z",
+    "updatedAt": "2026-06-19T06:33:33.389Z",
+    "type": "page"
+  },
+  {
+    "slug": "/k2",
+    "title": "k2",
+    "markdown": "# hi\nthis is a editor\n\n\\\n\n:::Accordion\n{\n  \"items\": [\n    {\n      \"title\": \"How does NextEditor work?\",\n      \"content\": \"NextEditor parses standard Markdown along with custom blocks wrapped in ::: tags.\"\n    },\n    {\n      \"title\": \"Can I add custom CSS?\",\n      \"content\": \"Yes! The entire project runs on native responsive Vanilla CSS.\"\n    },\n    {\n      \"title\": \"How do I export to Next.js?\",\n      \"content\": \"Use the \\\"Get Code\\\" button in the toolbar to copy ready-to-use Next.js component code.\"\n    }\n  ]\n}\n:::\n\n:::TestimonialRow\n{\n  \"testimonials\": [\n    {\n      \"name\": \"Danny Rand\",\n      \"text\": \"This visual editor feels extremely fluid. Highly recommended!\",\n      \"image\": \"https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop\"\n    },\n    {\n      \"name\": \"Sarah Chen\",\n      \"text\": \"Finally a CMS that does not get in the way of design. Beautiful default styles!\",\n      \"image\": \"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop\"\n    }\n  ]\n}\n:::\n\n:::ImageBlock\n{\n  \"src\": \"https://images.unsplash.com/photo-1472289065668-ce650ac443d2?w=800&auto=format&fit=crop\",\n  \"alt\": \"Beautiful digital creative banner\",\n  \"caption\": \"Visuals captured live from premium photo stocks\"\n}\n:::",
+    "status": "published",
+    "createdAt": "2026-06-19T07:00:21.721Z",
+    "updatedAt": "2026-06-19T07:43:26.078Z",
+    "type": "blog",
+    "readingTime": 1,
+    "updatedDate": "2026-06-19T07:43:26.078Z",
+    "tags": []
+  },
+  {
+    "slug": "/blog/new",
+    "title": "Services",
+    "markdown": ":::NavBlock\n{\n  \"logoText\": \"NextEditor\",\n  \"logoUrl\": \"#\",\n  \"links\": [\n    {\n      \"label\": \"Home\",\n      \"url\": \"#\"\n    },\n    {\n      \"label\": \"Features\",\n      \"url\": \"#features\"\n    },\n    {\n      \"label\": \"Pricing\",\n      \"url\": \"#pricing\"\n    },\n    {\n      \"label\": \"Blog\",\n      \"url\": \"/blog\"\n    }\n  ],\n  \"ctaLabel\": \"Sign Up\",\n  \"ctaUrl\": \"/signup\",\n  \"sticky\": true,\n  \"customStyles\": {\n    \"marginTop\": \"-10px\"\n  }\n}\n:::\n\n:::HeroBlock\n{\n  \"title\": \"Build Something Amazing\",\n  \"subtitle\": \"A modern visual editor powered by Markdown and React. Start crafting beautiful pages today.\",\n  \"badgeText\": \"✨ New Release\",\n  \"ctaText\": \"Get Started\",\n  \"ctaUrl\": \"#\",\n  \"secondaryText\": \"Learn More\",\n  \"secondaryUrl\": \"#\",\n  \"variant\": \"gradient\",\n  \"customStyles\": {\n    \"marginTop\": \"-30px\",\n    \"boxShadow\": \"sm\",\n    \"borderRadius\": -132\n  }\n}\n:::\n\n:::DividerBlock\n{\n  \"style\": \"gradient\",\n  \"weight\": \"normal\",\n  \"text\": \"\",\n  \"spacing\": \"md\"\n}\n:::\n\n:::TextBlock\n{\n  \"content\": \"### Styled Text Container\\nThis is a text container that supports direct CSS styles. Use the right inspector panel design settings to set margins, paddings, background gradients, borders, or inline CSS.\",\n  \"customStyles\": {\n    \"marginTop\": \"-20px\"\n  }\n}\n:::",
+    "status": "published",
+    "readingTime": 1,
+    "createdAt": "2026-06-19T09:44:31.825Z",
+    "updatedAt": "2026-06-19T09:52:21.923Z",
+    "type": "page",
+    "tags": [],
+    "updatedDate": "2026-06-19T09:52:21.923Z"
+  }
+]
