@@ -11,6 +11,28 @@ import {
   Code,
   Layers,
   X,
+  Rocket,
+  Package,
+  SeparatorHorizontal,
+  Megaphone,
+  MousePointerClick,
+  Code2,
+  Image,
+  LayoutList,
+  MessageSquare,
+  BarChart3,
+  Navigation,
+  PanelBottom,
+  Columns2,
+  CreditCard,
+  AlignLeft,
+  Braces,
+  Lightbulb,
+  Rows3,
+  Zap,
+  Box,
+  BookOpen,
+  Pencil,
 } from "lucide-react";
 import { Accordion } from "../render/Accordion";
 import { Card } from "../render/Card";
@@ -28,6 +50,11 @@ import { ColumnsBlock } from "../render/ColumnsBlock";
 import { PricingBlock } from "../render/PricingBlock";
 import { TextBlock } from "../render/TextBlock";
 import { EmbedBlock } from "../render/EmbedBlock";
+import { AdmonitionBlock } from "../render/AdmonitionBlock";
+import { TabsBlock } from "../render/TabsBlock";
+import { StepBlock } from "../render/StepBlock";
+import { HighlightBlock } from "../render/HighlightBlock";
+import { ContainerBlock } from "../render/ContainerBlock";
 
 interface DraggableBlockProps {
   id: string;
@@ -47,23 +74,31 @@ interface DraggableBlockProps {
   isPreviewMode?: boolean;
 }
 
-const BLOCK_META: Record<string, { icon: string; color: string }> = {
-  HeroBlock: { icon: "🚀", color: "#6366f1" },
-  Card: { icon: "📦", color: "#0ea5e9" },
-  DividerBlock: { icon: "〰️", color: "#94a3b8" },
-  CalloutBlock: { icon: "📢", color: "#f59e0b" },
-  ButtonBlock: { icon: "🔘", color: "#10b981" },
-  CodeBlock: { icon: "💻", color: "#8b5cf6" },
-  ImageBlock: { icon: "🖼️", color: "#ec4899" },
-  Accordion: { icon: "📋", color: "#06b6d4" },
-  TestimonialRow: { icon: "💬", color: "#84cc16" },
-  StatsBlock: { icon: "📊", color: "#f97316" },
-  NavBlock: { icon: "🧭", color: "#0ea5e9" },
-  FooterBlock: { icon: "🚪", color: "#475569" },
-  ColumnsBlock: { icon: "🥞", color: "#8b5cf6" },
-  PricingBlock: { icon: "🏷️", color: "#10b981" },
-  TextBlock: { icon: "✍️", color: "#6366f1" },
-  EmbedBlock: { icon: "🧩", color: "#f43f5e" },
+const mkI = (C: React.ElementType) =>
+  React.createElement(C, { size: 14, strokeWidth: 1.8 });
+
+const BLOCK_META: Record<string, { icon: React.ReactNode; color: string }> = {
+  HeroBlock: { icon: mkI(Rocket), color: "#2563eb" },
+  Card: { icon: mkI(Package), color: "#0ea5e9" },
+  DividerBlock: { icon: mkI(SeparatorHorizontal), color: "#94a3b8" },
+  CalloutBlock: { icon: mkI(Megaphone), color: "#f59e0b" },
+  ButtonBlock: { icon: mkI(MousePointerClick), color: "#10b981" },
+  CodeBlock: { icon: mkI(Code2), color: "#7c3aed" },
+  ImageBlock: { icon: mkI(Image), color: "#ec4899" },
+  Accordion: { icon: mkI(LayoutList), color: "#06b6d4" },
+  TestimonialRow: { icon: mkI(MessageSquare), color: "#84cc16" },
+  StatsBlock: { icon: mkI(BarChart3), color: "#f97316" },
+  NavBlock: { icon: mkI(Navigation), color: "#0ea5e9" },
+  FooterBlock: { icon: mkI(PanelBottom), color: "#475569" },
+  ColumnsBlock: { icon: mkI(Columns2), color: "#7c3aed" },
+  PricingBlock: { icon: mkI(CreditCard), color: "#10b981" },
+  TextBlock: { icon: mkI(AlignLeft), color: "#2563eb" },
+  EmbedBlock: { icon: mkI(Braces), color: "#f43f5e" },
+  AdmonitionBlock: { icon: mkI(Lightbulb), color: "#10b981" },
+  TabsBlock: { icon: mkI(BookOpen), color: "#0ea5e9" },
+  StepBlock: { icon: mkI(Rows3), color: "#7c3aed" },
+  HighlightBlock: { icon: mkI(Zap), color: "#f59e0b" },
+  ContainerBlock: { icon: mkI(Box), color: "#64748b" },
 };
 
 const parseSpacing = (val: any) => {
@@ -97,7 +132,7 @@ export function DraggableBlock({
   const [isDragOver, setIsDragOver] = useState(false);
   const blockRef = useRef<HTMLDivElement>(null);
 
-  const meta = BLOCK_META[type] || { icon: "🧩", color: "#6366f1" };
+  const meta = BLOCK_META[type] || { icon: mkI(Box), color: "#2563eb" };
 
   // ── JSON editor ─────────────────────────────────────────────────────────────
   const openJsonEditor = (e: React.MouseEvent) => {
@@ -186,6 +221,16 @@ export function DraggableBlock({
         return <TextBlock {...commonProps} />;
       case "EmbedBlock":
         return <EmbedBlock {...commonProps} isEditable={editable} />;
+      case "AdmonitionBlock":
+        return <AdmonitionBlock {...commonProps} />;
+      case "TabsBlock":
+        return <TabsBlock {...commonProps} />;
+      case "StepBlock":
+        return <StepBlock {...commonProps} />;
+      case "HighlightBlock":
+        return <HighlightBlock {...commonProps} />;
+      case "ContainerBlock":
+        return <ContainerBlock {...commonProps} />;
       default:
         return (
           <div className="unknown-block-type">
@@ -243,20 +288,24 @@ export function DraggableBlock({
     )
       styleObj.marginRight = parseSpacing(styleSettings.marginRight);
 
-    if (
-      styleSettings.borderRadius !== undefined &&
-      styleSettings.borderRadius !== ""
-    )
+    if (styleSettings.borderRadius !== undefined && styleSettings.borderRadius !== "")
       styleObj.borderRadius = parseSpacing(styleSettings.borderRadius);
-    if (
-      styleSettings.borderWidth !== undefined &&
-      styleSettings.borderWidth !== ""
-    ) {
+    if (styleSettings.borderWidth !== undefined && styleSettings.borderWidth !== "") {
       styleObj.borderWidth = parseSpacing(styleSettings.borderWidth);
-      styleObj.borderStyle = styleSettings.borderStyle || "solid";
-      if (styleSettings.borderColor)
-        styleObj.borderColor = styleSettings.borderColor;
+      styleObj.borderStyle = (styleSettings.borderStyle || "solid") as any;
+      if (styleSettings.borderColor) styleObj.borderColor = styleSettings.borderColor;
+    } else if (styleSettings.borderColor) {
+      styleObj.borderStyle = (styleSettings.borderStyle || "solid") as any;
+      styleObj.borderColor = styleSettings.borderColor;
     }
+    if (styleSettings.opacity !== undefined && styleSettings.opacity !== "")
+      styleObj.opacity = parseFloat(styleSettings.opacity);
+    if (styleSettings.lineHeight !== undefined && styleSettings.lineHeight !== "")
+      styleObj.lineHeight = parseFloat(styleSettings.lineHeight);
+    if (styleSettings.textTransform)
+      styleObj.textTransform = styleSettings.textTransform as any;
+    if (styleSettings.overflow)
+      styleObj.overflow = styleSettings.overflow as any;
 
     if (styleSettings.boxShadow === "sm") {
       styleObj.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";

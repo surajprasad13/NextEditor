@@ -46,6 +46,28 @@ import {
   Files,
   ArrowUp,
   ArrowDown,
+  Rocket,
+  Package,
+  SeparatorHorizontal,
+  Megaphone,
+  MousePointerClick,
+  Code2,
+  LayoutList,
+  MessageSquare,
+  BarChart3,
+  Navigation,
+  PanelBottom,
+  Columns2,
+  CreditCard,
+  AlignLeft,
+  Braces,
+  Lightbulb,
+  Rows3,
+  Zap,
+  Box,
+  BookOpen,
+  Pencil,
+  CodeXml,
 } from "lucide-react";
 import {
   parseMarkdownToNodes,
@@ -61,22 +83,31 @@ import { MarkdownTextRenderer } from "../render/MarkdownTextRenderer";
 import { PageItem } from "@/lib/db";
 import LinkComponent from "next/link";
 
-const BLOCK_META: Record<string, { icon: string; color: string }> = {
-  HeroBlock: { icon: "🚀", color: "#6366f1" },
-  Card: { icon: "📦", color: "#0ea5e9" },
-  DividerBlock: { icon: "〰️", color: "#94a3b8" },
-  CalloutBlock: { icon: "📢", color: "#f59e0b" },
-  ButtonBlock: { icon: "🔘", color: "#10b981" },
-  CodeBlock: { icon: "💻", color: "#8b5cf6" },
-  ImageBlock: { icon: "🖼️", color: "#ec4899" },
-  Accordion: { icon: "📋", color: "#06b6d4" },
-  TestimonialRow: { icon: "💬", color: "#84cc16" },
-  StatsBlock: { icon: "📊", color: "#f97316" },
-  NavBlock: { icon: "🧭", color: "#0ea5e9" },
-  FooterBlock: { icon: "🚪", color: "#475569" },
-  ColumnsBlock: { icon: "🥞", color: "#8b5cf6" },
-  PricingBlock: { icon: "🏷️", color: "#10b981" },
-  TextBlock: { icon: "✍️", color: "#6366f1" },
+const mkI = (C: React.ElementType) =>
+  React.createElement(C, { size: 14, strokeWidth: 1.8 });
+
+const BLOCK_META: Record<string, { icon: React.ReactNode; color: string }> = {
+  HeroBlock: { icon: mkI(Rocket), color: "#2563eb" },
+  Card: { icon: mkI(Package), color: "#0ea5e9" },
+  DividerBlock: { icon: mkI(SeparatorHorizontal), color: "#94a3b8" },
+  CalloutBlock: { icon: mkI(Megaphone), color: "#f59e0b" },
+  ButtonBlock: { icon: mkI(MousePointerClick), color: "#10b981" },
+  CodeBlock: { icon: mkI(Code2), color: "#7c3aed" },
+  ImageBlock: { icon: mkI(ImageIcon), color: "#ec4899" },
+  Accordion: { icon: mkI(LayoutList), color: "#06b6d4" },
+  TestimonialRow: { icon: mkI(MessageSquare), color: "#84cc16" },
+  StatsBlock: { icon: mkI(BarChart3), color: "#f97316" },
+  NavBlock: { icon: mkI(Navigation), color: "#0ea5e9" },
+  FooterBlock: { icon: mkI(PanelBottom), color: "#475569" },
+  ColumnsBlock: { icon: mkI(Columns2), color: "#7c3aed" },
+  PricingBlock: { icon: mkI(CreditCard), color: "#10b981" },
+  TextBlock: { icon: mkI(AlignLeft), color: "#2563eb" },
+  EmbedBlock: { icon: mkI(Braces), color: "#f43f5e" },
+  AdmonitionBlock: { icon: mkI(Lightbulb), color: "#10b981" },
+  TabsBlock: { icon: mkI(BookOpen), color: "#0ea5e9" },
+  StepBlock: { icon: mkI(Rows3), color: "#7c3aed" },
+  HighlightBlock: { icon: mkI(Zap), color: "#f59e0b" },
+  ContainerBlock: { icon: mkI(Box), color: "#64748b" },
 };
 
 const MAX_HISTORY = 100;
@@ -102,8 +133,9 @@ export function VisualEditor() {
 
   // ── UI State ───────────────────────────────────────────────────────────────
   const [activeLeftTab, setActiveLeftTab] = useState<
-    "pages" | "blocks" | "seo" | "markdown" | "export"
+    "pages" | "blocks" | "seo" | "markdown" | "html" | "export"
   >("blocks");
+  const [htmlContent, setHtmlContent] = useState("");
   const [activeRightTab, setActiveRightTab] = useState<"inspector" | "outline">(
     "inspector",
   );
@@ -125,6 +157,7 @@ export function VisualEditor() {
   // ── Insert dropdown ────────────────────────────────────────────────────────
   const [showInsertDropdown, setShowInsertDropdown] = useState(false);
   const [designStylesExpanded, setDesignStylesExpanded] = useState(false);
+  const [activeInspectorTab, setActiveInspectorTab] = useState<"content" | "style">("content");
   const [activeColumnSubPanel, setActiveColumnSubPanel] = useState<
     string | null
   >(null);
@@ -159,6 +192,7 @@ export function VisualEditor() {
 
   // ── Refs ───────────────────────────────────────────────────────────────────
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const htmlTextareaRef = useRef<HTMLTextAreaElement>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
   const insertDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -255,6 +289,14 @@ export function VisualEditor() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [markdown]);
 
+  // ── Sync HTML content when switching to HTML tab ──────────────────────────
+  useEffect(() => {
+    if (activeLeftTab === "html") {
+      setHtmlContent(nodesToHtml(nodes));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeLeftTab]);
+
   // ── Close insert dropdown on outside click ─────────────────────────────────
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
@@ -319,6 +361,131 @@ export function VisualEditor() {
     pushHistory(compiled);
     setMarkdown(compiled);
   }, []);
+
+  // ── HTML ↔ Nodes conversion ────────────────────────────────────────────────
+  // Markdown → minimal HTML (headings, bold, italic, lists, paragraphs)
+  const markdownBlockToHtml = (md: string): string => {
+    const lines = md.split("\n");
+    const out: string[] = [];
+    let inUl = false, inOl = false, inPre = false, inBlockquote = false;
+    const flushUl = () => { if (inUl) { out.push("</ul>"); inUl = false; } };
+    const flushOl = () => { if (inOl) { out.push("</ol>"); inOl = false; } };
+    const flushBq = () => { if (inBlockquote) { out.push("</blockquote>"); inBlockquote = false; } };
+    const inlineToHtml = (s: string) =>
+      s.replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>")
+       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+       .replace(/\*(.+?)\*/g, "<em>$1</em>")
+       .replace(/~~(.+?)~~/g, "<del>$1</del>")
+       .replace(/`([^`]+)`/g, "<code>$1</code>")
+       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+
+    for (const line of lines) {
+      if (line.startsWith("```")) {
+        if (!inPre) { flushUl(); flushOl(); flushBq(); out.push("<pre><code>"); inPre = true; }
+        else { out.push("</code></pre>"); inPre = false; }
+        continue;
+      }
+      if (inPre) { out.push(line.replace(/&/g,"&amp;").replace(/</g,"&lt;")); continue; }
+      if (line.startsWith("###### ")) { flushUl(); flushOl(); flushBq(); out.push(`<h6>${inlineToHtml(line.slice(7))}</h6>`); continue; }
+      if (line.startsWith("##### ")) { flushUl(); flushOl(); flushBq(); out.push(`<h5>${inlineToHtml(line.slice(6))}</h5>`); continue; }
+      if (line.startsWith("#### ")) { flushUl(); flushOl(); flushBq(); out.push(`<h4>${inlineToHtml(line.slice(5))}</h4>`); continue; }
+      if (line.startsWith("### ")) { flushUl(); flushOl(); flushBq(); out.push(`<h3>${inlineToHtml(line.slice(4))}</h3>`); continue; }
+      if (line.startsWith("## ")) { flushUl(); flushOl(); flushBq(); out.push(`<h2>${inlineToHtml(line.slice(3))}</h2>`); continue; }
+      if (line.startsWith("# ")) { flushUl(); flushOl(); flushBq(); out.push(`<h1>${inlineToHtml(line.slice(2))}</h1>`); continue; }
+      if (line.startsWith("> ")) { flushUl(); flushOl(); if (!inBlockquote) { out.push("<blockquote>"); inBlockquote = true; } out.push(`<p>${inlineToHtml(line.slice(2))}</p>`); continue; }
+      if (line.match(/^[-*+] /)) { flushOl(); flushBq(); if (!inUl) { out.push("<ul>"); inUl = true; } out.push(`<li>${inlineToHtml(line.slice(2))}</li>`); continue; }
+      if (line.match(/^\d+\. /)) { flushUl(); flushBq(); if (!inOl) { out.push("<ol>"); inOl = true; } out.push(`<li>${inlineToHtml(line.replace(/^\d+\. /, ""))}</li>`); continue; }
+      if (line.match(/^(-{3,}|\*{3,}|_{3,})$/)) { flushUl(); flushOl(); flushBq(); out.push("<hr>"); continue; }
+      flushUl(); flushOl(); flushBq();
+      if (line.trim() === "") { out.push(""); continue; }
+      out.push(`<p>${inlineToHtml(line)}</p>`);
+    }
+    flushUl(); flushOl(); flushBq();
+    if (inPre) out.push("</code></pre>");
+    return out.join("\n");
+  };
+
+  const nodesToHtml = (nodes: EditorNode[]): string =>
+    nodes.map(n => {
+      if (n.type === "markdown") {
+        return markdownBlockToHtml(n.content || "");
+      }
+      // Component blocks: serialize as an HTML comment so they round-trip
+      return `<!-- BLOCK:${n.componentType}\n${JSON.stringify(n.props, null, 2)}\n-->`;
+    }).join("\n\n");
+
+  // HTML → nodes (round-trip: comment blocks → component nodes, rest → markdown)
+  const htmlToNodes = (html: string): EditorNode[] => {
+    const nodes: EditorNode[] = [];
+    let idx = 0;
+    // Split on BLOCK comments
+    const BLOCK_RE = /<!--\s*BLOCK:(\w+)\n([\s\S]*?)\n-->/g;
+    let lastEnd = 0;
+    let match;
+    while ((match = BLOCK_RE.exec(html)) !== null) {
+      const before = html.slice(lastEnd, match.index).trim();
+      if (before) {
+        nodes.push({ id: `node-${idx++}`, type: "markdown", content: htmlToMarkdown(before) });
+      }
+      try {
+        const props = JSON.parse(match[2].trim());
+        nodes.push({ id: `node-${idx++}`, type: "component", componentType: match[1], props });
+      } catch {
+        nodes.push({ id: `node-${idx++}`, type: "component", componentType: match[1], props: {} });
+      }
+      lastEnd = match.index + match[0].length;
+    }
+    const tail = html.slice(lastEnd).trim();
+    if (tail) {
+      nodes.push({ id: `node-${idx++}`, type: "markdown", content: htmlToMarkdown(tail) });
+    }
+    return nodes.length ? nodes : [{ id: "node-0", type: "markdown", content: "" }];
+  };
+
+  // Basic HTML → markdown (enough for round-tripping paragraph editing)
+  const htmlToMarkdown = (html: string): string =>
+    html
+      .replace(/<h1[^>]*>(.*?)<\/h1>/gi, "# $1")
+      .replace(/<h2[^>]*>(.*?)<\/h2>/gi, "## $1")
+      .replace(/<h3[^>]*>(.*?)<\/h3>/gi, "### $1")
+      .replace(/<h4[^>]*>(.*?)<\/h4>/gi, "#### $1")
+      .replace(/<h5[^>]*>(.*?)<\/h5>/gi, "##### $1")
+      .replace(/<h6[^>]*>(.*?)<\/h6>/gi, "###### $1")
+      .replace(/<strong[^>]*>(.*?)<\/strong>/gi, "**$1**")
+      .replace(/<b[^>]*>(.*?)<\/b>/gi, "**$1**")
+      .replace(/<em[^>]*>(.*?)<\/em>/gi, "*$1*")
+      .replace(/<i[^>]*>(.*?)<\/i>/gi, "*$1*")
+      .replace(/<del[^>]*>(.*?)<\/del>/gi, "~~$1~~")
+      .replace(/<code[^>]*>(.*?)<\/code>/gi, "`$1`")
+      .replace(/<pre[^>]*><code[^>]*>([\s\S]*?)<\/code><\/pre>/gi, "```\n$1\n```")
+      .replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, (_, inner) =>
+        inner.replace(/<p[^>]*>(.*?)<\/p>/gi, "> $1").trim()
+      )
+      .replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, inner) =>
+        inner.replace(/<li[^>]*>(.*?)<\/li>/gi, "- $1").trim()
+      )
+      .replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, inner) => {
+        let n = 0;
+        return inner.replace(/<li[^>]*>(.*?)<\/li>/gi, () => `${++n}. $1`).trim();
+      })
+      .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi, "[$2]($1)")
+      .replace(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*\/?>/gi, "![$2]($1)")
+      .replace(/<hr[^>]*\/?>/gi, "---")
+      .replace(/<br[^>]*\/?>/gi, "\n")
+      .replace(/<p[^>]*>(.*?)<\/p>/gi, "$1")
+      .replace(/<[^>]+>/g, "")
+      .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+
+  const handleHtmlChange = (val: string) => {
+    setHtmlContent(val);
+    const newNodes = htmlToNodes(val);
+    setNodes(newNodes);
+    const compiled = nodesToMarkdown(newNodes);
+    pushHistory(compiled);
+    setMarkdown(compiled);
+  };
 
   // ── Page selection ─────────────────────────────────────────────────────────
   const selectPage = (page: PageItem) => {
@@ -856,6 +1023,37 @@ Select any element on the right panel to customize its design. Adjust widths bel
     insertAtCursor(table);
   };
 
+  // ── HTML editor helpers ────────────────────────────────────────────────────
+  const insertHtmlTag = (tag: string) => {
+    const ta = htmlTextareaRef.current;
+    if (!ta) return;
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const selected = htmlContent.slice(start, end);
+    const replacement = selected
+      ? `<${tag}>${selected}</${tag}>`
+      : `<${tag}></${tag}>`;
+    const next = htmlContent.slice(0, start) + replacement + htmlContent.slice(end);
+    handleHtmlChange(next);
+    setTimeout(() => {
+      ta.focus();
+      const cursor = start + replacement.length - (selected ? 0 : `</${tag}>`.length);
+      ta.setSelectionRange(cursor, cursor);
+    }, 0);
+  };
+
+  const insertHtmlSnippet = (snippet: string) => {
+    const ta = htmlTextareaRef.current;
+    if (!ta) return;
+    const start = ta.selectionStart;
+    const next = htmlContent.slice(0, start) + snippet + htmlContent.slice(ta.selectionEnd);
+    handleHtmlChange(next);
+    setTimeout(() => {
+      ta.focus();
+      ta.setSelectionRange(start + snippet.length, start + snippet.length);
+    }, 0);
+  };
+
   // ── Find & Replace ─────────────────────────────────────────────────────────
   const handleReplace = () => {
     if (!findText) return;
@@ -1310,12 +1508,12 @@ Select any element on the right panel to customize its design. Adjust widths bel
           {nodes.map((node, index) => {
             const isSelected = selectedId === node.id;
             const meta = BLOCK_META[node.componentType || ""] || {
-              icon: "📝",
+              icon: mkI(Pencil),
               color: "var(--accent)",
             };
             const label =
               node.type === "markdown" ? "Text Block" : node.componentType;
-            const icon = node.type === "markdown" ? "📝" : meta.icon;
+            const icon = node.type === "markdown" ? mkI(Pencil) : meta.icon;
 
             let previewText = "";
             if (node.type === "markdown") {
@@ -1408,7 +1606,7 @@ Select any element on the right panel to customize its design. Adjust widths bel
     );
   };
 
-  const renderGenericStyles = (selectedNode: EditorNode) => {
+  const renderStylePanel = (selectedNode: EditorNode) => {
     const customStyles = selectedNode.props?.customStyles || {};
 
     const updateStyle = (key: string, value: any) => {
@@ -1416,693 +1614,288 @@ Select any element on the right panel to customize its design. Adjust widths bel
       const currentStyles = currentProps.customStyles || {};
       handleUpdateNode(selectedNode.id, {
         ...currentProps,
-        customStyles: {
-          ...currentStyles,
-          [key]: value === "" ? undefined : value,
-        },
+        customStyles: { ...currentStyles, [key]: value === "" ? undefined : value },
       });
     };
 
+    // Helper: color field with native picker + text input side by side
+    const ColorField = ({ label, styleKey, placeholder }: { label: string; styleKey: string; placeholder: string }) => {
+      const val = customStyles[styleKey] || "";
+      const isHex = /^#[0-9a-fA-F]{3,6}$/.test(val);
+      return (
+        <div className="inspector-form-field" style={{ margin: 0 }}>
+          <label style={{ fontSize: "0.7rem" }}>{label}</label>
+          <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
+            <input
+              type="color"
+              value={isHex ? val : "#ffffff"}
+              onChange={(e) => updateStyle(styleKey, e.target.value)}
+              style={{ width: 28, height: 28, border: "1px solid var(--border-color)", borderRadius: 4, cursor: "pointer", padding: 1, flexShrink: 0 }}
+            />
+            <input
+              type="text"
+              className="inspector-input"
+              style={{ margin: 0, flex: 1 }}
+              value={val}
+              onChange={(e) => updateStyle(styleKey, e.target.value)}
+              placeholder={placeholder}
+            />
+          </div>
+        </div>
+      );
+    };
+
+    const SectionTitle = ({ children }: { children: React.ReactNode }) => (
+      <h5 style={{ margin: "16px 0 6px", fontSize: "0.68rem", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.6px" }}>
+        {children}
+      </h5>
+    );
+
     return (
-      <div
-        className="collapsible-design-section"
-        style={{
-          borderTop: "1px solid var(--border-color)",
-          marginTop: "20px",
-          paddingTop: "16px",
-        }}
-      >
-        <button
-          type="button"
-          className="design-section-toggle-btn"
-          onClick={() => setDesignStylesExpanded(!designStylesExpanded)}
-          style={{
-            display: "flex",
-            width: "100%",
-            justifyContent: "space-between",
-            alignItems: "center",
-            background: "none",
-            border: "none",
-            color: "var(--text-main)",
-            fontWeight: 600,
-            fontSize: "0.8rem",
-            padding: "8px 0",
-            cursor: "pointer",
-            textAlign: "left",
-          }}
-        >
-          <span>🎨 Box Styles & Design Engine</span>
-          <ChevronDown
-            size={14}
-            style={{
-              transform: designStylesExpanded
-                ? "rotate(180deg)"
-                : "rotate(0deg)",
-              transition: "transform 0.2s",
-              color: "var(--text-sub)",
-            }}
-          />
-        </button>
+      <div style={{ display: "flex", flexDirection: "column", gap: 0, padding: "12px 14px" }}>
 
-        {designStylesExpanded && (
-          <div
-            className="design-section-content animate-slide-down"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "14px",
-              marginTop: "12px",
-            }}
-          >
-            {/* Grid & Column Layout */}
-            <div
-              className="design-field-group"
-              style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-            >
-              <h5
-                style={{
-                  margin: 0,
-                  fontSize: "0.7rem",
-                  color: "var(--text-sub)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Grid & Column Layout
-              </h5>
-
-              <div className="inspector-form-field" style={{ margin: 0 }}>
-                <label style={{ fontSize: "0.7rem" }}>
-                  Block Width (Row Span)
-                </label>
-                <select
-                  className="inspector-select"
-                  value={customStyles.blockWidth || "100"}
-                  onChange={(e) => updateStyle("blockWidth", e.target.value)}
-                >
-                  <option value="100">Full Row (100%)</option>
-                  <option value="75">Three-Quarters (75%)</option>
-                  <option value="66.66">Two-Thirds (66.7%)</option>
-                  <option value="50">Half Row (50%)</option>
-                  <option value="33.33">One-Third (33.3%)</option>
-                  <option value="25">One-Quarter (25%)</option>
-                </select>
-              </div>
-
-              <div className="inspector-two-col">
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Vertical Align</label>
-                  <select
-                    className="inspector-select"
-                    value={customStyles.verticalAlign || "stretch"}
-                    onChange={(e) =>
-                      updateStyle("verticalAlign", e.target.value)
-                    }
-                  >
-                    <option value="stretch">Stretch (Height)</option>
-                    <option value="flex-start">Top</option>
-                    <option value="center">Middle</option>
-                    <option value="flex-end">Bottom</option>
-                  </select>
-                </div>
-
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Content Align</label>
-                  <select
-                    className="inspector-select"
-                    value={customStyles.contentAlign || ""}
-                    onChange={(e) =>
-                      updateStyle("contentAlign", e.target.value)
-                    }
-                  >
-                    <option value="">Default (Left)</option>
-                    <option value="left">Left</option>
-                    <option value="center">Center</option>
-                    <option value="right">Right</option>
-                    <option value="justify">Justify</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Colors & Background Media */}
-            <div
-              className="design-field-group"
-              style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-            >
-              <h5
-                style={{
-                  margin: 0,
-                  fontSize: "0.7rem",
-                  color: "var(--text-sub)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Colors & Background Media
-              </h5>
-              <div className="inspector-two-col">
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Bg Color</label>
-                  <input
-                    type="text"
-                    className="inspector-input color-picker-input"
-                    value={customStyles.bgColor || ""}
-                    onChange={(e) => updateStyle("bgColor", e.target.value)}
-                    placeholder="#ffffff or transparent"
-                  />
-                </div>
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>
-                    Text Color Override
-                  </label>
-                  <input
-                    type="text"
-                    className="inspector-input color-picker-input"
-                    value={customStyles.textColor || ""}
-                    onChange={(e) => updateStyle("textColor", e.target.value)}
-                    placeholder="#333333"
-                  />
-                </div>
-              </div>
-
-              <div className="inspector-form-field" style={{ margin: 0 }}>
-                <label style={{ fontSize: "0.7rem" }}>
-                  Background Image URL
-                </label>
-                <input
-                  type="text"
-                  className="inspector-input"
-                  value={customStyles.bgImage || ""}
-                  onChange={(e) => updateStyle("bgImage", e.target.value)}
-                  placeholder="https://images.unsplash.com/photo-..."
-                />
-              </div>
-
-              <div className="inspector-two-col">
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>
-                    Dark Image Overlay (0-1)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="1"
-                    className="inspector-input"
-                    value={customStyles.bgOverlay ?? ""}
-                    onChange={(e) =>
-                      updateStyle(
-                        "bgOverlay",
-                        e.target.value === "" ? "" : parseFloat(e.target.value),
-                      )
-                    }
-                    placeholder="0.4"
-                  />
-                </div>
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>
-                    Gradient (CSS Formula)
-                  </label>
-                  <input
-                    type="text"
-                    className="inspector-input"
-                    value={customStyles.bgGradient || ""}
-                    onChange={(e) => updateStyle("bgGradient", e.target.value)}
-                    placeholder="45deg, #6366f1, #a855f7"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Container Max Width */}
-            <div
-              className="design-field-group"
-              style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-            >
-              <h5
-                style={{
-                  margin: 0,
-                  fontSize: "0.7rem",
-                  color: "var(--text-sub)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Layout Box Sizing
-              </h5>
-              <div className="inspector-form-field" style={{ margin: 0 }}>
-                <label style={{ fontSize: "0.7rem" }}>
-                  Container Section Width
-                </label>
-                <select
-                  className="inspector-select"
-                  value={customStyles.maxWidth || "full"}
-                  onChange={(e) => updateStyle("maxWidth", e.target.value)}
-                >
-                  <option value="full">Full Width (100%)</option>
-                  <option value="wide">Wide (1200px Centered)</option>
-                  <option value="narrow">Narrow (600px Centered)</option>
-                  <option value="custom">Custom Width px</option>
-                </select>
-              </div>
-              {customStyles.maxWidth === "custom" && (
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>
-                    Custom Max Width (px)
-                  </label>
-                  <input
-                    type="number"
-                    className="inspector-input"
-                    value={customStyles.customMaxWidth || ""}
-                    onChange={(e) =>
-                      updateStyle(
-                        "customMaxWidth",
-                        e.target.value === "" ? "" : parseInt(e.target.value),
-                      )
-                    }
-                    placeholder="900"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Spacing Padding */}
-            <div
-              className="design-field-group"
-              style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-            >
-              <h5
-                style={{
-                  margin: 0,
-                  fontSize: "0.7rem",
-                  color: "var(--text-sub)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Paddings (Inner Spacing px)
-              </h5>
-              <div className="inspector-two-col">
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Top</label>
-                  <input
-                    type="number"
-                    className="inspector-input"
-                    value={customStyles.paddingTop ?? ""}
-                    onChange={(e) =>
-                      updateStyle(
-                        "paddingTop",
-                        e.target.value === "" ? "" : parseInt(e.target.value),
-                      )
-                    }
-                    placeholder="0"
-                  />
-                </div>
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Bottom</label>
-                  <input
-                    type="number"
-                    className="inspector-input"
-                    value={customStyles.paddingBottom ?? ""}
-                    onChange={(e) =>
-                      updateStyle(
-                        "paddingBottom",
-                        e.target.value === "" ? "" : parseInt(e.target.value),
-                      )
-                    }
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-              <div className="inspector-two-col">
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Left</label>
-                  <input
-                    type="number"
-                    className="inspector-input"
-                    value={customStyles.paddingLeft ?? ""}
-                    onChange={(e) =>
-                      updateStyle(
-                        "paddingLeft",
-                        e.target.value === "" ? "" : parseInt(e.target.value),
-                      )
-                    }
-                    placeholder="0"
-                  />
-                </div>
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Right</label>
-                  <input
-                    type="number"
-                    className="inspector-input"
-                    value={customStyles.paddingRight ?? ""}
-                    onChange={(e) =>
-                      updateStyle(
-                        "paddingRight",
-                        e.target.value === "" ? "" : parseInt(e.target.value),
-                      )
-                    }
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Spacing Margins */}
-            <div
-              className="design-field-group"
-              style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-            >
-              <h5
-                style={{
-                  margin: 0,
-                  fontSize: "0.7rem",
-                  color: "var(--text-sub)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Margins (Outer Spacing px)
-              </h5>
-              <div className="inspector-two-col">
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Top</label>
-                  <input
-                    type="text"
-                    className="inspector-input"
-                    value={customStyles.marginTop ?? ""}
-                    onChange={(e) => updateStyle("marginTop", e.target.value)}
-                    placeholder="0 or auto"
-                  />
-                </div>
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Bottom</label>
-                  <input
-                    type="text"
-                    className="inspector-input"
-                    value={customStyles.marginBottom ?? ""}
-                    onChange={(e) =>
-                      updateStyle("marginBottom", e.target.value)
-                    }
-                    placeholder="0 or auto"
-                  />
-                </div>
-              </div>
-              <div className="inspector-two-col">
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Left</label>
-                  <input
-                    type="text"
-                    className="inspector-input"
-                    value={customStyles.marginLeft ?? ""}
-                    onChange={(e) => updateStyle("marginLeft", e.target.value)}
-                    placeholder="0 or auto"
-                  />
-                </div>
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Right</label>
-                  <input
-                    type="text"
-                    className="inspector-input"
-                    value={customStyles.marginRight ?? ""}
-                    onChange={(e) => updateStyle("marginRight", e.target.value)}
-                    placeholder="0 or auto"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Typography */}
-            <div
-              className="design-field-group"
-              style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-            >
-              <h5
-                style={{
-                  margin: 0,
-                  fontSize: "0.7rem",
-                  color: "var(--text-sub)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Typography & Fonts
-              </h5>
-              <div className="inspector-two-col">
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Font Family</label>
-                  <select
-                    className="inspector-select"
-                    value={customStyles.fontFamily || ""}
-                    onChange={(e) => updateStyle("fontFamily", e.target.value)}
-                  >
-                    <option value="">Default Theme</option>
-                    <option value="sans">Sans (Inter/Outfit)</option>
-                    <option value="serif">Serif (Playfair)</option>
-                    <option value="mono">Mono (Grotesk/Code)</option>
-                    <option value="system">System Default</option>
-                  </select>
-                </div>
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Font Size (px)</label>
-                  <input
-                    type="number"
-                    className="inspector-input"
-                    value={customStyles.fontSize ?? ""}
-                    onChange={(e) =>
-                      updateStyle(
-                        "fontSize",
-                        e.target.value === "" ? "" : parseInt(e.target.value),
-                      )
-                    }
-                    placeholder="16"
-                  />
-                </div>
-              </div>
-
-              <div className="inspector-two-col">
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Font Weight</label>
-                  <select
-                    className="inspector-select"
-                    value={customStyles.fontWeight || ""}
-                    onChange={(e) => updateStyle("fontWeight", e.target.value)}
-                  >
-                    <option value="">Default Weight</option>
-                    <option value="300">300 - Light</option>
-                    <option value="400">400 - Regular</option>
-                    <option value="500">500 - Medium</option>
-                    <option value="600">600 - Semibold</option>
-                    <option value="700">700 - Bold</option>
-                    <option value="800">800 - Extra Bold</option>
-                  </select>
-                </div>
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>
-                    Letter Spacing (px)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    className="inspector-input"
-                    value={customStyles.letterSpacing ?? ""}
-                    onChange={(e) =>
-                      updateStyle(
-                        "letterSpacing",
-                        e.target.value === "" ? "" : parseFloat(e.target.value),
-                      )
-                    }
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Borders & Radii */}
-            <div
-              className="design-field-group"
-              style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-            >
-              <h5
-                style={{
-                  margin: 0,
-                  fontSize: "0.7rem",
-                  color: "var(--text-sub)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Borders & Shadows
-              </h5>
-              <div className="inspector-two-col">
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>
-                    Corner Radius (px)
-                  </label>
-                  <input
-                    type="number"
-                    className="inspector-input"
-                    value={customStyles.borderRadius ?? ""}
-                    onChange={(e) =>
-                      updateStyle(
-                        "borderRadius",
-                        e.target.value === "" ? "" : parseInt(e.target.value),
-                      )
-                    }
-                    placeholder="0"
-                  />
-                </div>
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Shadow Depth</label>
-                  <select
-                    className="inspector-select"
-                    value={customStyles.boxShadow || "none"}
-                    onChange={(e) => updateStyle("boxShadow", e.target.value)}
-                  >
-                    <option value="none">Flat (No Shadow)</option>
-                    <option value="sm">Subtle Soft</option>
-                    <option value="md">Medium Shadow</option>
-                    <option value="lg">Floating Elevation</option>
-                  </select>
-                </div>
-              </div>
-              <div className="inspector-two-col">
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>
-                    Border Width (px)
-                  </label>
-                  <input
-                    type="number"
-                    className="inspector-input"
-                    value={customStyles.borderWidth ?? ""}
-                    onChange={(e) =>
-                      updateStyle(
-                        "borderWidth",
-                        e.target.value === "" ? "" : parseInt(e.target.value),
-                      )
-                    }
-                    placeholder="0"
-                  />
-                </div>
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Border Color</label>
-                  <input
-                    type="text"
-                    className="inspector-input color-picker-input"
-                    value={customStyles.borderColor || ""}
-                    onChange={(e) => updateStyle("borderColor", e.target.value)}
-                    placeholder="#e2e8f0"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Hover Effects */}
-            <div
-              className="design-field-group"
-              style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-            >
-              <h5
-                style={{
-                  margin: 0,
-                  fontSize: "0.7rem",
-                  color: "var(--text-sub)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Hover Transitions & Effects
-              </h5>
-              <div className="inspector-two-col">
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Hover Animation</label>
-                  <select
-                    className="inspector-select"
-                    value={customStyles.hoverEffect || "none"}
-                    onChange={(e) => updateStyle("hoverEffect", e.target.value)}
-                  >
-                    <option value="none">No Hover Effect</option>
-                    <option value="scale">Zoom Up (1.03x)</option>
-                    <option value="float">Float Up (-6px)</option>
-                    <option value="shadow">Shadow Elevate</option>
-                    <option value="border-glow">Accent Border Glow</option>
-                  </select>
-                </div>
-                <div className="inspector-form-field" style={{ margin: 0 }}>
-                  <label style={{ fontSize: "0.7rem" }}>Transition Speed</label>
-                  <select
-                    className="inspector-select"
-                    value={customStyles.transitionSpeed || "0.3s"}
-                    onChange={(e) =>
-                      updateStyle("transitionSpeed", e.target.value)
-                    }
-                  >
-                    <option value="0.1s">0.1s - Snappy</option>
-                    <option value="0.2s">0.2s - Smooth</option>
-                    <option value="0.3s">0.3s - Elegant</option>
-                    <option value="0.5s">0.5s - Slow</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Custom CSS/Classes */}
-            <div
-              className="design-field-group"
-              style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-            >
-              <h5
-                style={{
-                  margin: 0,
-                  fontSize: "0.7rem",
-                  color: "var(--text-sub)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                }}
-              >
-                Stylesheet Overrides
-              </h5>
-              <div className="inspector-form-field" style={{ margin: 0 }}>
-                <label style={{ fontSize: "0.7rem" }}>
-                  Custom HTML Classes
-                </label>
-                <input
-                  type="text"
-                  className="inspector-input"
-                  value={customStyles.customClass || ""}
-                  onChange={(e) => updateStyle("customClass", e.target.value)}
-                  placeholder="my-custom-class shadow-hover"
-                />
-              </div>
-              <div className="inspector-form-field" style={{ margin: 0 }}>
-                <label style={{ fontSize: "0.7rem" }}>
-                  Custom Scoped CSS Rules
-                </label>
-                <textarea
-                  className="inspector-textarea font-mono-editor"
-                  value={customStyles.customCss || ""}
-                  onChange={(e) => updateStyle("customCss", e.target.value)}
-                  placeholder="border: 2px dashed red;&#10;opacity: 0.9;&#10;transition: all 0.3s ease;"
-                  rows={4}
-                  style={{ fontFamily: "monospace", fontSize: "0.75rem" }}
-                />
-                <span
-                  className="field-helper-caption"
-                  style={{
-                    fontSize: "0.65rem",
-                    color: "var(--text-sub)",
-                    opacity: 0.8,
-                  }}
-                >
-                  Enter raw CSS declarations to style the block container.
-                </span>
-              </div>
-            </div>
+        {/* ── Layout ── */}
+        <SectionTitle>Layout</SectionTitle>
+        <div className="inspector-form-field" style={{ margin: 0 }}>
+          <label style={{ fontSize: "0.7rem" }}>Block Width</label>
+          <select className="inspector-select" value={customStyles.blockWidth || "100"} onChange={(e) => updateStyle("blockWidth", e.target.value)}>
+            <option value="100">Full (100%)</option>
+            <option value="75">3/4 (75%)</option>
+            <option value="66.66">2/3 (66.7%)</option>
+            <option value="50">1/2 (50%)</option>
+            <option value="33.33">1/3 (33.3%)</option>
+            <option value="25">1/4 (25%)</option>
+          </select>
+        </div>
+        <div className="inspector-two-col" style={{ marginTop: 6 }}>
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Align Self</label>
+            <select className="inspector-select" value={customStyles.verticalAlign || "stretch"} onChange={(e) => updateStyle("verticalAlign", e.target.value)}>
+              <option value="stretch">Stretch</option>
+              <option value="flex-start">Top</option>
+              <option value="center">Center</option>
+              <option value="flex-end">Bottom</option>
+            </select>
+          </div>
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Text Align</label>
+            <select className="inspector-select" value={customStyles.contentAlign || ""} onChange={(e) => updateStyle("contentAlign", e.target.value)}>
+              <option value="">Default</option>
+              <option value="left">Left</option>
+              <option value="center">Center</option>
+              <option value="right">Right</option>
+              <option value="justify">Justify</option>
+            </select>
+          </div>
+        </div>
+        <div className="inspector-form-field" style={{ margin: "6px 0 0" }}>
+          <label style={{ fontSize: "0.7rem" }}>Max Width</label>
+          <select className="inspector-select" value={customStyles.maxWidth || "full"} onChange={(e) => updateStyle("maxWidth", e.target.value)}>
+            <option value="full">Full Width</option>
+            <option value="wide">Wide (1200px)</option>
+            <option value="narrow">Narrow (600px)</option>
+            <option value="custom">Custom px</option>
+          </select>
+        </div>
+        {customStyles.maxWidth === "custom" && (
+          <div className="inspector-form-field" style={{ margin: "6px 0 0" }}>
+            <label style={{ fontSize: "0.7rem" }}>Custom px</label>
+            <input type="number" className="inspector-input" value={customStyles.customMaxWidth || ""} onChange={(e) => updateStyle("customMaxWidth", e.target.value === "" ? "" : parseInt(e.target.value))} placeholder="900" />
           </div>
         )}
+
+        {/* ── Spacing ── */}
+        <SectionTitle>Padding</SectionTitle>
+        <div className="inspector-four-col">
+          {(["paddingTop","paddingRight","paddingBottom","paddingLeft"] as const).map((k, i) => (
+            <div key={k} className="inspector-form-field" style={{ margin: 0 }}>
+              <label style={{ fontSize: "0.65rem" }}>{["T","R","B","L"][i]}</label>
+              <input type="number" className="inspector-input" value={customStyles[k] ?? ""} onChange={(e) => updateStyle(k, e.target.value === "" ? "" : parseInt(e.target.value))} placeholder="0" />
+            </div>
+          ))}
+        </div>
+
+        <SectionTitle>Margin</SectionTitle>
+        <div className="inspector-four-col">
+          {(["marginTop","marginRight","marginBottom","marginLeft"] as const).map((k, i) => (
+            <div key={k} className="inspector-form-field" style={{ margin: 0 }}>
+              <label style={{ fontSize: "0.65rem" }}>{["T","R","B","L"][i]}</label>
+              <input type="text" className="inspector-input" value={customStyles[k] ?? ""} onChange={(e) => updateStyle(k, e.target.value)} placeholder="0" />
+            </div>
+          ))}
+        </div>
+
+        {/* ── Colors ── */}
+        <SectionTitle>Color & Background</SectionTitle>
+        <div className="inspector-two-col">
+          <ColorField label="Background" styleKey="bgColor" placeholder="transparent" />
+          <ColorField label="Text Color" styleKey="textColor" placeholder="#1e293b" />
+        </div>
+        <div className="inspector-form-field" style={{ margin: "6px 0 0" }}>
+          <label style={{ fontSize: "0.7rem" }}>Background Image URL</label>
+          <input type="text" className="inspector-input" value={customStyles.bgImage || ""} onChange={(e) => updateStyle("bgImage", e.target.value)} placeholder="https://..." />
+        </div>
+        <div className="inspector-two-col" style={{ marginTop: 6 }}>
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Overlay (0–1)</label>
+            <input type="number" step="0.05" min="0" max="1" className="inspector-input" value={customStyles.bgOverlay ?? ""} onChange={(e) => updateStyle("bgOverlay", e.target.value === "" ? "" : parseFloat(e.target.value))} placeholder="0.4" />
+          </div>
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Opacity (0–1)</label>
+            <input type="number" step="0.05" min="0" max="1" className="inspector-input" value={customStyles.opacity ?? ""} onChange={(e) => updateStyle("opacity", e.target.value === "" ? "" : parseFloat(e.target.value))} placeholder="1" />
+          </div>
+        </div>
+        <div className="inspector-form-field" style={{ margin: "6px 0 0" }}>
+          <label style={{ fontSize: "0.7rem" }}>Gradient (CSS args)</label>
+          <input type="text" className="inspector-input" value={customStyles.bgGradient || ""} onChange={(e) => updateStyle("bgGradient", e.target.value)} placeholder="135deg, #2563eb, #06b6d4" />
+        </div>
+
+        {/* ── Typography ── */}
+        <SectionTitle>Typography</SectionTitle>
+        <div className="inspector-two-col">
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Font Family</label>
+            <select className="inspector-select" value={customStyles.fontFamily || ""} onChange={(e) => updateStyle("fontFamily", e.target.value)}>
+              <option value="">Default</option>
+              <option value="sans">Sans</option>
+              <option value="serif">Serif</option>
+              <option value="mono">Mono</option>
+              <option value="system">System</option>
+            </select>
+          </div>
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Size (px)</label>
+            <input type="number" className="inspector-input" value={customStyles.fontSize ?? ""} onChange={(e) => updateStyle("fontSize", e.target.value === "" ? "" : parseInt(e.target.value))} placeholder="16" />
+          </div>
+        </div>
+        <div className="inspector-two-col" style={{ marginTop: 6 }}>
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Weight</label>
+            <select className="inspector-select" value={customStyles.fontWeight || ""} onChange={(e) => updateStyle("fontWeight", e.target.value)}>
+              <option value="">Default</option>
+              <option value="300">300 Light</option>
+              <option value="400">400 Regular</option>
+              <option value="500">500 Medium</option>
+              <option value="600">600 Semibold</option>
+              <option value="700">700 Bold</option>
+              <option value="800">800 ExtraBold</option>
+            </select>
+          </div>
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Line Height</label>
+            <input type="number" step="0.1" className="inspector-input" value={customStyles.lineHeight ?? ""} onChange={(e) => updateStyle("lineHeight", e.target.value === "" ? "" : parseFloat(e.target.value))} placeholder="1.6" />
+          </div>
+        </div>
+        <div className="inspector-two-col" style={{ marginTop: 6 }}>
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Letter Spacing</label>
+            <input type="number" step="0.5" className="inspector-input" value={customStyles.letterSpacing ?? ""} onChange={(e) => updateStyle("letterSpacing", e.target.value === "" ? "" : parseFloat(e.target.value))} placeholder="0" />
+          </div>
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Transform</label>
+            <select className="inspector-select" value={customStyles.textTransform || ""} onChange={(e) => updateStyle("textTransform", e.target.value)}>
+              <option value="">None</option>
+              <option value="uppercase">UPPERCASE</option>
+              <option value="lowercase">lowercase</option>
+              <option value="capitalize">Capitalize</option>
+            </select>
+          </div>
+        </div>
+
+        {/* ── Border ── */}
+        <SectionTitle>Border & Radius</SectionTitle>
+        <div className="inspector-two-col">
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Width (px)</label>
+            <input type="number" className="inspector-input" value={customStyles.borderWidth ?? ""} onChange={(e) => updateStyle("borderWidth", e.target.value === "" ? "" : parseInt(e.target.value))} placeholder="0" />
+          </div>
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Style</label>
+            <select className="inspector-select" value={customStyles.borderStyle || "solid"} onChange={(e) => updateStyle("borderStyle", e.target.value)}>
+              <option value="solid">Solid</option>
+              <option value="dashed">Dashed</option>
+              <option value="dotted">Dotted</option>
+              <option value="double">Double</option>
+              <option value="none">None</option>
+            </select>
+          </div>
+        </div>
+        <div className="inspector-two-col" style={{ marginTop: 6 }}>
+          <ColorField label="Border Color" styleKey="borderColor" placeholder="#e2e8f0" />
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Radius (px)</label>
+            <input type="number" className="inspector-input" value={customStyles.borderRadius ?? ""} onChange={(e) => updateStyle("borderRadius", e.target.value === "" ? "" : parseInt(e.target.value))} placeholder="0" />
+          </div>
+        </div>
+
+        {/* ── Shadow & Effects ── */}
+        <SectionTitle>Shadow & Effects</SectionTitle>
+        <div className="inspector-two-col">
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Box Shadow</label>
+            <select className="inspector-select" value={customStyles.boxShadow || "none"} onChange={(e) => updateStyle("boxShadow", e.target.value)}>
+              <option value="none">None</option>
+              <option value="sm">Subtle</option>
+              <option value="md">Medium</option>
+              <option value="lg">Floating</option>
+            </select>
+          </div>
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Overflow</label>
+            <select className="inspector-select" value={customStyles.overflow || ""} onChange={(e) => updateStyle("overflow", e.target.value)}>
+              <option value="">Default</option>
+              <option value="hidden">Hidden</option>
+              <option value="scroll">Scroll</option>
+              <option value="auto">Auto</option>
+              <option value="visible">Visible</option>
+            </select>
+          </div>
+        </div>
+        <div className="inspector-two-col" style={{ marginTop: 6 }}>
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Hover Effect</label>
+            <select className="inspector-select" value={customStyles.hoverEffect || "none"} onChange={(e) => updateStyle("hoverEffect", e.target.value)}>
+              <option value="none">None</option>
+              <option value="scale">Zoom (1.03×)</option>
+              <option value="float">Float Up</option>
+              <option value="shadow">Shadow Rise</option>
+              <option value="border-glow">Border Glow</option>
+            </select>
+          </div>
+          <div className="inspector-form-field" style={{ margin: 0 }}>
+            <label style={{ fontSize: "0.7rem" }}>Transition</label>
+            <select className="inspector-select" value={customStyles.transitionSpeed || "0.2s"} onChange={(e) => updateStyle("transitionSpeed", e.target.value)}>
+              <option value="0.1s">0.1s</option>
+              <option value="0.2s">0.2s</option>
+              <option value="0.3s">0.3s</option>
+              <option value="0.5s">0.5s</option>
+            </select>
+          </div>
+        </div>
+
+        {/* ── Custom Code ── */}
+        <SectionTitle>Custom Code</SectionTitle>
+        <div className="inspector-form-field" style={{ margin: 0 }}>
+          <label style={{ fontSize: "0.7rem" }}>CSS Classes</label>
+          <input type="text" className="inspector-input" value={customStyles.customClass || ""} onChange={(e) => updateStyle("customClass", e.target.value)} placeholder="my-class another-class" />
+        </div>
+        <div className="inspector-form-field" style={{ margin: "6px 0 0" }}>
+          <label style={{ fontSize: "0.7rem" }}>Inline CSS</label>
+          <textarea
+            className="inspector-textarea font-mono-editor"
+            value={customStyles.customCss || ""}
+            onChange={(e) => updateStyle("customCss", e.target.value)}
+            placeholder={"color: red;\nopacity: 0.9;"}
+            rows={4}
+            style={{ fontFamily: "monospace", fontSize: "0.72rem" }}
+          />
+        </div>
       </div>
     );
+  };
+
+  const renderGenericStyles = (selectedNode: EditorNode) => {
+    return null;
   };
 
   // ── Properties Inspector Builder ───────────────────────────────────────────
@@ -2141,11 +1934,11 @@ Select any element on the right panel to customize its design. Adjust widths bel
             <div className="inspector-quick-outline">
               {nodes.map((node, index) => {
                 const meta = BLOCK_META[node.componentType || ""] || {
-                  icon: "📝",
+                  icon: mkI(Pencil),
                 };
                 const label =
                   node.type === "markdown" ? "Text Block" : node.componentType;
-                const icon = node.type === "markdown" ? "📝" : meta.icon;
+                const icon = node.type === "markdown" ? mkI(Pencil) : meta.icon;
                 return (
                   <button
                     key={node.id}
@@ -2181,7 +1974,7 @@ Select any element on the right panel to customize its design. Adjust widths bel
     };
 
     const meta = BLOCK_META[selectedNode.componentType || ""] || {
-      icon: "📝",
+      icon: mkI(Pencil),
       color: "var(--accent)",
     };
 
@@ -2192,7 +1985,7 @@ Select any element on the right panel to customize its design. Adjust widths bel
             className="inspector-node-header"
             style={{ borderLeft: "4px solid #6366f1" }}
           >
-            <span className="icon">📝</span>
+            <span className="icon">{mkI(Pencil)}</span>
             <div className="meta">
               <span className="type">Text Block</span>
               <span className="id">
@@ -2271,6 +2064,21 @@ Select any element on the right panel to customize its design. Adjust widths bel
           </button>
         </div>
 
+        {/* Content / Style sub-tabs */}
+        <div className="inspector-subtab-bar">
+          <button
+            type="button"
+            className={`inspector-subtab-btn ${activeInspectorTab === "content" ? "active" : ""}`}
+            onClick={() => setActiveInspectorTab("content")}
+          >Content</button>
+          <button
+            type="button"
+            className={`inspector-subtab-btn ${activeInspectorTab === "style" ? "active" : ""}`}
+            onClick={() => setActiveInspectorTab("style")}
+          >Style</button>
+        </div>
+
+        {activeInspectorTab === "style" ? renderStylePanel(selectedNode) : (
         <div className="inspector-fields-wrapper">
           {(() => {
             switch (selectedNode.componentType) {
@@ -2299,7 +2107,7 @@ Select any element on the right panel to customize its design. Adjust widths bel
                           updateProp("badgeText", e.target.value)
                         }
                         className="inspector-input"
-                        placeholder="✨ New Release"
+                        placeholder="New Release"
                       />
                     </div>
                     <div className="inspector-form-field">
@@ -2474,10 +2282,11 @@ Select any element on the right panel to customize its design. Adjust widths bel
                         onChange={(e) => updateProp("variant", e.target.value)}
                         className="inspector-select"
                       >
-                        <option value="info">ℹ️ Info (Indigo)</option>
-                        <option value="warning">⚠️ Warning (Amber)</option>
-                        <option value="success">✅ Success (Green)</option>
-                        <option value="danger">🚨 Danger (Red)</option>
+                        <option value="info">Info</option>
+                        <option value="tip">Tip</option>
+                        <option value="success">Success</option>
+                        <option value="warning">Warning</option>
+                        <option value="danger">Danger</option>
                       </select>
                     </div>
                     <div className="inspector-form-field">
@@ -2574,7 +2383,7 @@ Select any element on the right panel to customize its design. Adjust widths bel
                           value={props.icon || ""}
                           onChange={(e) => updateProp("icon", e.target.value)}
                           className="inspector-input"
-                          placeholder="🚀"
+                          placeholder="icon"
                         />
                       </div>
                     </div>
@@ -2964,7 +2773,7 @@ Select any element on the right panel to customize its design. Adjust widths bel
                                 updateProp("stats", newStats);
                               }}
                               className="inspector-input"
-                              placeholder="Prefix (⭐)"
+                              placeholder="Prefix text"
                             />
                             <input
                               type="text"
@@ -3459,10 +3268,10 @@ Select any element on the right panel to customize its design. Adjust widths bel
                               >
                                 Column #{idx + 1} (
                                 {col.type === "custom"
-                                  ? "🚀 Custom"
+                                  ? "Custom"
                                   : col.type === "image"
-                                  ? "🖼️ Image"
-                                  : "📝 Text"}
+                                  ? "Image"
+                                  : "Text"}
                                 )
                               </span>
                               <ChevronDown
@@ -3509,10 +3318,10 @@ Select any element on the right panel to customize its design. Adjust widths bel
                                     className="inspector-select"
                                   >
                                     <option value="markdown">
-                                      📝 Standard Markdown Text
+                                      Standard Markdown Text
                                     </option>
                                     <option value="image">
-                                      🖼️ Simple Image Column
+                                      Simple Image Column
                                     </option>
                                     <option value="custom">
                                       🚀 Custom Rich Layout Box
@@ -3624,7 +3433,7 @@ Select any element on the right panel to customize its design. Adjust widths bel
                                             updateProp("columns", newCols);
                                           }}
                                           className="inspector-input"
-                                          placeholder="🚀 or ✨"
+                                          placeholder="emoji or text"
                                         />
                                       </div>
                                       <div
@@ -3796,7 +3605,7 @@ Select any element on the right panel to customize its design. Adjust widths bel
                                       color: "var(--text-sub)",
                                     }}
                                   >
-                                    🎨 Column Card Styling
+                                    Column Card Styling
                                   </span>
 
                                   <div className="inspector-two-col">
@@ -4269,19 +4078,150 @@ Select any element on the right panel to customize its design. Adjust widths bel
                   </div>
                 );
 
+              case "AdmonitionBlock":
+                return (
+                  <>
+                    <div className="inspector-form-field">
+                      <label>Type</label>
+                      <select className="inspector-select" value={props.type || "tip"} onChange={e => updateProp("type", e.target.value)}>
+                        <option value="tip">Tip</option>
+                        <option value="note">Note</option>
+                        <option value="info">Info</option>
+                        <option value="warning">Warning</option>
+                        <option value="danger">Danger</option>
+                      </select>
+                    </div>
+                    <div className="inspector-form-field">
+                      <label>Title</label>
+                      <input type="text" className="inspector-input" value={props.title || ""} onChange={e => updateProp("title", e.target.value)} placeholder="Tip" />
+                    </div>
+                    <div className="inspector-form-field">
+                      <label>Content</label>
+                      <textarea className="inspector-textarea" rows={5} value={props.content || ""} onChange={e => updateProp("content", e.target.value)} placeholder="Body text..." />
+                    </div>
+                  </>
+                );
+
+              case "TabsBlock":
+                return (
+                  <>
+                    <label className="inspector-form-label">Tabs</label>
+                    <div className="inspector-list-builder">
+                      {(props.tabs || []).map((tab: any, i: number) => (
+                        <div key={i} className="list-builder-card">
+                          <div className="card-header">
+                            <span>Tab #{i + 1}</span>
+                            <button type="button" className="list-delete-btn" onClick={() => { const t = [...props.tabs]; t.splice(i, 1); updateProp("tabs", t); }}><Trash2 size={11} /> Remove</button>
+                          </div>
+                          <div className="card-fields">
+                            <input type="text" className="inspector-input" value={tab.label || ""} placeholder="Tab label" onChange={e => { const t = [...props.tabs]; t[i] = { ...tab, label: e.target.value }; updateProp("tabs", t); }} />
+                            <textarea className="inspector-textarea" rows={3} value={tab.content || ""} placeholder="Tab content..." onChange={e => { const t = [...props.tabs]; t[i] = { ...tab, content: e.target.value }; updateProp("tabs", t); }} />
+                          </div>
+                        </div>
+                      ))}
+                      <button type="button" className="list-add-btn" onClick={() => updateProp("tabs", [...(props.tabs || []), { label: "New Tab", content: "" }])}><Plus size={11} /> Add Tab</button>
+                    </div>
+                  </>
+                );
+
+              case "StepBlock":
+                return (
+                  <>
+                    <div className="inspector-form-field">
+                      <label>Style</label>
+                      <select className="inspector-select" value={props.variant || "number"} onChange={e => updateProp("variant", e.target.value)}>
+                        <option value="number">Numbered (1, 2, 3…)</option>
+                        <option value="bullet">Bullet (•)</option>
+                      </select>
+                    </div>
+                    <label className="inspector-form-label">Steps</label>
+                    <div className="inspector-list-builder">
+                      {(props.steps || []).map((step: any, i: number) => (
+                        <div key={i} className="list-builder-card">
+                          <div className="card-header">
+                            <span>Step #{i + 1}</span>
+                            <button type="button" className="list-delete-btn" onClick={() => { const s = [...props.steps]; s.splice(i, 1); updateProp("steps", s); }}><Trash2 size={11} /> Remove</button>
+                          </div>
+                          <div className="card-fields">
+                            <input type="text" className="inspector-input" value={step.title || ""} placeholder="Step title" onChange={e => { const s = [...props.steps]; s[i] = { ...step, title: e.target.value }; updateProp("steps", s); }} />
+                            <textarea className="inspector-textarea" rows={2} value={step.content || ""} placeholder="Step description..." onChange={e => { const s = [...props.steps]; s[i] = { ...step, content: e.target.value }; updateProp("steps", s); }} />
+                          </div>
+                        </div>
+                      ))}
+                      <button type="button" className="list-add-btn" onClick={() => updateProp("steps", [...(props.steps || []), { title: `Step ${(props.steps || []).length + 1}`, content: "" }])}><Plus size={11} /> Add Step</button>
+                    </div>
+                  </>
+                );
+
+              case "HighlightBlock":
+                return (
+                  <>
+                    <div className="inspector-form-field">
+                      <label>Prefix / Icon</label>
+                      <input type="text" className="inspector-input" value={props.prefix || ""} onChange={e => updateProp("prefix", e.target.value)} placeholder="prefix text" />
+                    </div>
+                    <div className="inspector-form-field">
+                      <label>Text</label>
+                      <textarea className="inspector-textarea" rows={3} value={props.text || ""} onChange={e => updateProp("text", e.target.value)} placeholder="Highlighted text..." />
+                    </div>
+                    <div className="inspector-form-field">
+                      <label>Accent Color</label>
+                      <input type="color" value={props.color || "#6366f1"} onChange={e => updateProp("color", e.target.value)} style={{ width: 40, height: 30, border: "none", borderRadius: 4, cursor: "pointer" }} />
+                    </div>
+                  </>
+                );
+
+              case "ContainerBlock":
+                return (
+                  <>
+                    <div className="inspector-form-field">
+                      <label>Title (optional)</label>
+                      <input type="text" className="inspector-input" value={props.title || ""} onChange={e => updateProp("title", e.target.value)} placeholder="Section heading" />
+                    </div>
+                    <div className="inspector-form-field">
+                      <label>Content</label>
+                      <textarea className="inspector-textarea" rows={6} value={props.content || ""} onChange={e => updateProp("content", e.target.value)} placeholder="Content inside the container..." />
+                    </div>
+                    <div className="inspector-two-col">
+                      <div className="inspector-form-field">
+                        <label>Corner Radius (px)</label>
+                        <input type="number" className="inspector-input" value={props.borderRadius ?? 8} onChange={e => updateProp("borderRadius", parseInt(e.target.value) || 0)} />
+                      </div>
+                      <div className="inspector-form-field">
+                        <label>Padding (px)</label>
+                        <input type="number" className="inspector-input" value={props.padding ?? 20} onChange={e => updateProp("padding", parseInt(e.target.value) || 0)} />
+                      </div>
+                    </div>
+                  </>
+                );
+
+              case "EmbedBlock":
+                return (
+                  <>
+                    <div className="inspector-form-field">
+                      <label>HTML / Embed Code</label>
+                      <textarea
+                        value={props.html || ""}
+                        onChange={(e) => updateProp("html", e.target.value)}
+                        className="inspector-textarea font-mono-editor"
+                        rows={10}
+                        style={{ fontFamily: "monospace", fontSize: "0.75rem" }}
+                        placeholder={"<div>Your HTML here</div>"}
+                      />
+                    </div>
+                  </>
+                );
+
               default:
                 return (
-                  <div style={{ padding: "8px", opacity: 0.6 }}>
-                    No inspector fields mapped for:{" "}
-                    <strong>{selectedNode.componentType}</strong>
+                  <div style={{ padding: "8px", opacity: 0.6, fontSize: "0.8rem" }}>
+                    No content fields for <strong>{selectedNode.componentType}</strong> — use the Style tab to customize.
                   </div>
                 );
             }
           })()}
-
-          {/* ── GENERIC DESIGN & STYLES INSPECTOR ────────────────────────────── */}
-          {renderGenericStyles(selectedNode)}
         </div>
+        )}
       </div>
     );
   };
@@ -4391,7 +4331,7 @@ Select any element on the right panel to customize its design. Adjust widths bel
               {/* Sidebar drawer switcher tab icons */}
               <div className="builder-sidebar-switcher">
                 {(
-                  ["pages", "blocks", "seo", "markdown", "export"] as const
+                  ["pages", "blocks", "seo", "markdown", "html", "export"] as const
                 ).map((tab) => {
                   const label =
                     tab === "pages"
@@ -4402,6 +4342,8 @@ Select any element on the right panel to customize its design. Adjust widths bel
                       ? "Settings"
                       : tab === "markdown"
                       ? "Markdown"
+                      : tab === "html"
+                      ? "HTML"
                       : "Export";
                   const icon =
                     tab === "pages" ? (
@@ -4412,6 +4354,8 @@ Select any element on the right panel to customize its design. Adjust widths bel
                       <Settings size={15} />
                     ) : tab === "markdown" ? (
                       <FileText size={15} />
+                    ) : tab === "html" ? (
+                      <CodeXml size={15} />
                     ) : (
                       <FileCode size={15} />
                     );
@@ -4493,68 +4437,65 @@ Select any element on the right panel to customize its design. Adjust widths bel
                   </div>
                 )}
 
-                {/* 2. BLOCKS TAB (ELEMENT LIBRARY) */}
+                {/* 2. BLOCKS TAB (ELEMENT LIBRARY) — Apidog list style */}
                 {activeLeftTab === "blocks" && (
                   <div className="sidebar-tab-content blocks-library-panel">
-                    <h4 className="sidebar-section-title">Block Library</h4>
-                    <p className="sidebar-section-desc">
-                      Click on any visual block to insert it.
-                    </p>
-                    <div className="blocks-categories-list">
-                      {/* Text Block */}
-                      <div className="library-category">
-                        <div className="category-header">
-                          <span>✍️ Standard Elements</span>
-                        </div>
-                        <div className="category-items-grid">
-                          <button
-                            type="button"
-                            onClick={() => handleInsertBlock("markdown")}
-                            className="library-block-card text-block-card"
-                          >
-                            <span className="block-card-icon">📝</span>
-                            <span className="block-card-title">Text Block</span>
-                            <span className="block-card-desc">
-                              Rich markdown text block with titles, lists,
-                              formatting, etc.
-                            </span>
-                          </button>
-                        </div>
-                      </div>
+                    <div className="blocks-search-bar">
+                      <Search size={12} className="search-icon" />
+                      <input
+                        type="text"
+                        value={pagesFilter}
+                        onChange={e => setPagesFilter(e.target.value)}
+                        placeholder="Search blocks..."
+                        className="pages-search-input"
+                      />
+                    </div>
+                    <div className="apidog-block-list">
+                      {/* Text / Markdown block */}
+                      {(!"markdown".includes(pagesFilter.toLowerCase()) ? false : true) || !pagesFilter ? (
+                        <button
+                          type="button"
+                          onClick={() => handleInsertBlock("markdown")}
+                          className="apidog-block-list-item"
+                        >
+                          <span className="abl-icon" style={{ background: "rgba(37,99,235,0.12)", color: "#2563eb" }}>{mkI(Pencil)}</span>
+                          <span className="abl-name">Text Block</span>
+                          <ChevronRight size={13} className="abl-arrow" />
+                        </button>
+                      ) : null}
 
-                      {componentCategories.map((cat) => (
-                        <div key={cat.key} className="library-category">
-                          <div className="category-header">
-                            <span>
-                              {cat.icon} {cat.label}
-                            </span>
-                          </div>
-                          <div className="category-items-grid">
-                            {cat.types.map((t) => {
+                      {componentCategories.map((cat) => {
+                        const filtered = cat.types.filter(t => {
+                          const def = componentDefinitions[t];
+                          if (!def) return false;
+                          if (!pagesFilter) return true;
+                          return def.name.toLowerCase().includes(pagesFilter.toLowerCase()) ||
+                            def.description.toLowerCase().includes(pagesFilter.toLowerCase());
+                        });
+                        if (filtered.length === 0) return null;
+                        return (
+                          <div key={cat.key}>
+                            <div className="apidog-block-list-group">{cat.icon} {cat.label}</div>
+                            {filtered.map(t => {
                               const def = componentDefinitions[t];
                               if (!def) return null;
+                              const meta = BLOCK_META[t] || { icon: mkI(Box), color: "#2563eb" };
                               return (
                                 <button
                                   key={t}
                                   type="button"
                                   onClick={() => handleInsertBlock(t)}
-                                  className="library-block-card"
+                                  className="apidog-block-list-item"
                                 >
-                                  <span className="block-card-icon">
-                                    {def.icon}
-                                  </span>
-                                  <span className="block-card-title">
-                                    {def.name}
-                                  </span>
-                                  <span className="block-card-desc">
-                                    {def.description}
-                                  </span>
+                                  <span className="abl-icon" style={{ background: meta.color + "22", color: meta.color }}>{def.icon}</span>
+                                  <span className="abl-name">{def.name}</span>
+                                  <ChevronRight size={13} className="abl-arrow" />
                                 </button>
                               );
                             })}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -5018,7 +4959,62 @@ Select any element on the right panel to customize its design. Adjust widths bel
                   </div>
                 )}
 
-                {/* 5. CODE EXPORT TAB */}
+                {/* 5. HTML SOURCE EDITOR TAB */}
+                {activeLeftTab === "html" && (
+                  <div className="sidebar-tab-content raw-markdown-editor-pane">
+                    <div className="apidog-formatting-toolbar" style={{ gap: 4 }}>
+                      <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", padding: "0 6px", fontFamily: "monospace" }}>HTML</span>
+                      <div className="toolbar-separator" />
+                      <button type="button" className="toolbar-btn" title="Wrap selection in <div>" onMouseDown={e => { e.preventDefault(); insertHtmlTag("div"); }}>div</button>
+                      <button type="button" className="toolbar-btn" title="Wrap in <span>" onMouseDown={e => { e.preventDefault(); insertHtmlTag("span"); }}>span</button>
+                      <button type="button" className="toolbar-btn" title="Wrap in <p>" onMouseDown={e => { e.preventDefault(); insertHtmlTag("p"); }}>p</button>
+                      <button type="button" className="toolbar-btn" title="Wrap in <strong>" onMouseDown={e => { e.preventDefault(); insertHtmlTag("strong"); }}><Bold size={11} /></button>
+                      <button type="button" className="toolbar-btn" title="Wrap in <em>" onMouseDown={e => { e.preventDefault(); insertHtmlTag("em"); }}><Italic size={11} /></button>
+                      <div className="toolbar-separator" />
+                      <button type="button" className="toolbar-btn" title="H1" onMouseDown={e => { e.preventDefault(); insertHtmlTag("h1"); }}><Heading1 size={11} /></button>
+                      <button type="button" className="toolbar-btn" title="H2" onMouseDown={e => { e.preventDefault(); insertHtmlTag("h2"); }}><Heading2 size={11} /></button>
+                      <button type="button" className="toolbar-btn" title="H3" onMouseDown={e => { e.preventDefault(); insertHtmlTag("h3"); }}><Heading3 size={11} /></button>
+                      <div className="toolbar-separator" />
+                      <button type="button" className="toolbar-btn" title="ul/li" onMouseDown={e => { e.preventDefault(); insertHtmlSnippet("<ul>\n  <li></li>\n</ul>"); }}><List size={11} /></button>
+                      <button type="button" className="toolbar-btn" title="ol/li" onMouseDown={e => { e.preventDefault(); insertHtmlSnippet("<ol>\n  <li></li>\n</ol>"); }}><ListOrdered size={11} /></button>
+                      <button type="button" className="toolbar-btn" title="Link" onMouseDown={e => { e.preventDefault(); insertHtmlSnippet('<a href="">text</a>'); }}><LinkIcon size={11} /></button>
+                      <button type="button" className="toolbar-btn" title="Image" onMouseDown={e => { e.preventDefault(); insertHtmlSnippet('<img src="" alt="" />'); }}><ImageIcon size={11} /></button>
+                      <div className="toolbar-separator" />
+                      <button
+                        type="button"
+                        className="toolbar-btn"
+                        title="Re-sync from canvas"
+                        style={{ fontSize: "0.65rem", padding: "2px 6px", color: "var(--accent)" }}
+                        onClick={() => setHtmlContent(nodesToHtml(nodes))}
+                      >Sync</button>
+                    </div>
+
+                    <div className="apidog-editor-textarea-container">
+                      <div className="editor-gutter">
+                        {Array.from({ length: Math.max(1, htmlContent.split("\n").length) }).map((_, i) => (
+                          <div key={i} className="gutter-line-number">{i + 1}</div>
+                        ))}
+                      </div>
+                      <textarea
+                        ref={htmlTextareaRef}
+                        value={htmlContent}
+                        onChange={(e) => handleHtmlChange(e.target.value)}
+                        className="apidog-editor-textarea"
+                        placeholder="<!-- HTML source — edit directly, changes reflect on canvas -->"
+                        spellCheck={false}
+                        style={{ fontFamily: "monospace", fontSize: "0.78rem" }}
+                      />
+                    </div>
+
+                    <div className="apidog-editor-stats-footer">
+                      <span>Lines: {htmlContent.split("\n").length}</span>
+                      <span>Chars: {htmlContent.length}</span>
+                      <span style={{ color: "var(--accent)", fontWeight: 600 }}>HTML Mode</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* 6. CODE EXPORT TAB */}
                 {activeLeftTab === "export" && (
                   <div
                     className="sidebar-tab-content editor-export-code-panel"
@@ -5077,6 +5073,54 @@ Select any element on the right panel to customize its design. Adjust widths bel
 
           {/* ── COLUMN 2: CENTER VIEWPORT STAGING CANVAS ─────────────────────── */}
           <div className="apidog-right-preview-panel builder-center-canvas-panel">
+            {/* ── Inline Formatting Toolbar ── */}
+            {!isPreviewMode && (
+              <div className="canvas-format-toolbar" ref={insertDropdownRef}>
+                <button type="button" className="cft-btn" title="Heading" onClick={() => { setActiveLeftTab("markdown"); setTimeout(() => insertAtCursor("## ", ""), 50); }}><span className="cft-icon">H</span></button>
+                <button type="button" className="cft-btn" title="Bold" onClick={() => { setActiveLeftTab("markdown"); setTimeout(() => insertAtCursor("**", "**"), 50); }}><strong>B</strong></button>
+                <button type="button" className="cft-btn" title="Italic" onClick={() => { setActiveLeftTab("markdown"); setTimeout(() => insertAtCursor("*", "*"), 50); }}><em>I</em></button>
+                <button type="button" className="cft-btn" title="Quote" onClick={() => { setActiveLeftTab("markdown"); setTimeout(() => insertAtCursor("> ", ""), 50); }}><span style={{fontFamily:"serif",fontStyle:"italic",fontSize:"1.1em"}}>"</span></button>
+                <button type="button" className="cft-btn" title="Link" onClick={() => { setActiveLeftTab("markdown"); setTimeout(() => insertAtCursor("[", "](url)"), 50); }}><LinkIcon size={13} /></button>
+                <button type="button" className="cft-btn" title="Image" onClick={() => handleInsertBlock("ImageBlock")}><ImageIcon size={13} /></button>
+                <button type="button" className="cft-btn" title="Inline Code" onClick={() => { setActiveLeftTab("markdown"); setTimeout(() => insertAtCursor("`", "`"), 50); }}><Code size={13} /></button>
+                <button type="button" className="cft-btn" title="Code Block" onClick={() => handleInsertBlock("CodeBlock")}><Code2 size={13} /></button>
+                <button type="button" className="cft-btn" title="Bullet List" onClick={() => { setActiveLeftTab("markdown"); setTimeout(() => insertAtCursor("- ", ""), 50); }}><List size={13} /></button>
+                <button type="button" className="cft-btn" title="Numbered List" onClick={() => { setActiveLeftTab("markdown"); setTimeout(() => insertAtCursor("1. ", ""), 50); }}><ListOrdered size={13} /></button>
+                <button type="button" className="cft-btn" title="Strikethrough" onClick={() => { setActiveLeftTab("markdown"); setTimeout(() => insertAtCursor("~~", "~~"), 50); }}><Strikethrough size={13} /></button>
+                <button type="button" className="cft-btn" title="Checklist" onClick={() => { setActiveLeftTab("markdown"); setTimeout(() => insertAtCursor("- [ ] ", ""), 50); }}><CheckSquare size={13} /></button>
+                <button type="button" className="cft-btn" title="Table" onClick={() => { setActiveLeftTab("markdown"); setTimeout(() => insertTable(), 50); }}><Table size={13} /></button>
+                <div className="cft-separator" />
+                <button type="button" className="cft-btn" title="Admonition / Tip" onClick={() => handleInsertBlock("AdmonitionBlock")}><Lightbulb size={13} /></button>
+                <button type="button" className="cft-btn" title="Step Guide" onClick={() => handleInsertBlock("StepBlock")}><Rows3 size={13} /></button>
+                <div className="cft-separator" />
+                <button
+                  type="button"
+                  className="cft-insert-btn"
+                  onClick={() => setShowInsertDropdown(!showInsertDropdown)}
+                  title="Insert block"
+                >
+                  <Plus size={13} /> Insert
+                </button>
+                {showInsertDropdown && (
+                  <div className="cft-insert-dropdown">
+                    {componentCategories.map(cat => (
+                      <div key={cat.key}>
+                        <div className="cft-dropdown-group">{cat.icon} {cat.label}</div>
+                        {cat.types.map(t => {
+                          const def = componentDefinitions[t];
+                          if (!def) return null;
+                          return (
+                            <button key={t} type="button" className="cft-dropdown-item" onClick={() => handleInsertBlock(t)}>
+                              <span>{def.icon}</span> {def.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             {/* Device Layout Switcher */}
             <div className="apidog-preview-subheader builder-canvas-header">
               <div className="preview-device-switcher">
@@ -5199,7 +5243,7 @@ Select any element on the right panel to customize its design. Adjust widths bel
                               size={11}
                               className="grip-drag-icon"
                             />
-                            <span>📝 Text Block</span>
+                            <span>{mkI(Pencil)} Text Block</span>
                             <div
                               className="node-quick-actions"
                               style={{

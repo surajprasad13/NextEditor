@@ -1,18 +1,46 @@
+import React from "react";
+import {
+  Rocket,
+  Package,
+  SeparatorHorizontal,
+  Megaphone,
+  MousePointerClick,
+  Code2,
+  Image,
+  LayoutList,
+  MessageSquare,
+  BarChart3,
+  Navigation,
+  PanelBottom,
+  Columns2,
+  CreditCard,
+  AlignLeft,
+  Braces,
+  Lightbulb,
+  Rows3,
+  Zap,
+  Box,
+  BookOpen,
+} from "lucide-react";
+
 export interface ComponentDef {
   type: string;
   name: string;
-  icon: string;
+  icon: React.ReactNode;
   category: "layout" | "content" | "media" | "interactive" | "data";
   description: string;
   defaultProps: any;
 }
+
+const ico = (C: React.ElementType) =>
+  React.createElement(C, { size: 14, strokeWidth: 1.8 });
 
 export const componentDefinitions: Record<string, ComponentDef> = {
   // ── Layout ──────────────────────────────────────────────────────────────────
   HeroBlock: {
     type: "HeroBlock",
     name: "Hero Banner",
-    icon: "🚀",
+    icon: ico(Rocket),
     category: "layout",
     description:
       "Full-width hero section with headline, subtitle, and CTA buttons.",
@@ -20,7 +48,7 @@ export const componentDefinitions: Record<string, ComponentDef> = {
       title: "Build Something Amazing",
       subtitle:
         "A modern visual editor powered by Markdown and React. Start crafting beautiful pages today.",
-      badgeText: "✨ New Release",
+      badgeText: "New Release",
       ctaText: "Get Started",
       ctaUrl: "#",
       secondaryText: "Learn More",
@@ -31,7 +59,7 @@ export const componentDefinitions: Record<string, ComponentDef> = {
   Card: {
     type: "Card",
     name: "Content Card",
-    icon: "📦",
+    icon: ico(Package),
     category: "layout",
     description: "Visual card with image, title, and description.",
     defaultProps: {
@@ -45,7 +73,7 @@ export const componentDefinitions: Record<string, ComponentDef> = {
   DividerBlock: {
     type: "DividerBlock",
     name: "Section Divider",
-    icon: "〰️",
+    icon: ico(SeparatorHorizontal),
     category: "layout",
     description:
       "Decorative divider with optional center text and multiple styles.",
@@ -61,7 +89,7 @@ export const componentDefinitions: Record<string, ComponentDef> = {
   CalloutBlock: {
     type: "CalloutBlock",
     name: "Callout / Alert",
-    icon: "📢",
+    icon: ico(Megaphone),
     category: "content",
     description: "Info, warning, success, or danger callout alert box.",
     defaultProps: {
@@ -74,7 +102,7 @@ export const componentDefinitions: Record<string, ComponentDef> = {
   ButtonBlock: {
     type: "ButtonBlock",
     name: "Button / CTA",
-    icon: "🔘",
+    icon: ico(MousePointerClick),
     category: "content",
     description:
       "Call-to-action button with multiple variants and alignment options.",
@@ -84,21 +112,21 @@ export const componentDefinitions: Record<string, ComponentDef> = {
       variant: "primary",
       size: "lg",
       align: "center",
-      icon: "🚀",
+      icon: "",
       openNewTab: false,
     },
   },
   CodeBlock: {
     type: "CodeBlock",
     name: "Code Block",
-    icon: "💻",
+    icon: ico(Code2),
     category: "content",
     description:
       "Styled code snippet with language label, copy button, and optional line numbers.",
     defaultProps: {
       language: "javascript",
       filename: "example.js",
-      code: `// Welcome to NextEditor\nfunction greet(name) {\n  return \`Hello, \${name}! 👋\`;\n}\n\nconsole.log(greet('World'));`,
+      code: `// Welcome to NextEditor\nfunction greet(name) {\n  return \`Hello, \${name}!\`;\n}\n\nconsole.log(greet('World'));`,
       showLineNumbers: true,
     },
   },
@@ -107,7 +135,7 @@ export const componentDefinitions: Record<string, ComponentDef> = {
   ImageBlock: {
     type: "ImageBlock",
     name: "Image Gallery Block",
-    icon: "🖼️",
+    icon: ico(Image),
     category: "media",
     description: "Centered image with figcaption and optional alt text.",
     defaultProps: {
@@ -121,7 +149,7 @@ export const componentDefinitions: Record<string, ComponentDef> = {
   Accordion: {
     type: "Accordion",
     name: "Accordion FAQ",
-    icon: "📋",
+    icon: ico(LayoutList),
     category: "interactive",
     description: "Collapsible accordion sections for FAQ or content toggling.",
     defaultProps: {
@@ -147,7 +175,7 @@ export const componentDefinitions: Record<string, ComponentDef> = {
   TestimonialRow: {
     type: "TestimonialRow",
     name: "Testimonials Row",
-    icon: "💬",
+    icon: ico(MessageSquare),
     category: "interactive",
     description:
       "Visual customer testimonials row with avatar, name, and quote.",
@@ -173,7 +201,7 @@ export const componentDefinitions: Record<string, ComponentDef> = {
   StatsBlock: {
     type: "StatsBlock",
     name: "Stats / Numbers",
-    icon: "📊",
+    icon: ico(BarChart3),
     category: "data",
     description: "Display key metrics and statistics in a beautiful grid.",
     defaultProps: {
@@ -183,14 +211,14 @@ export const componentDefinitions: Record<string, ComponentDef> = {
         { value: "10K", label: "Happy Customers", suffix: "+" },
         { value: "99.9", label: "Uptime Guarantee", suffix: "%" },
         { value: "24", label: "Support Hours", suffix: "/7" },
-        { value: "4.9", label: "Average Rating", prefix: "⭐" },
+        { value: "4.9", label: "Average Rating", prefix: "" },
       ],
     },
   },
   NavBlock: {
     type: "NavBlock",
     name: "Header Navigation",
-    icon: "🧭",
+    icon: ico(Navigation),
     category: "layout",
     description:
       "Top header navigation bar with site logo, custom links, and action button.",
@@ -211,7 +239,7 @@ export const componentDefinitions: Record<string, ComponentDef> = {
   FooterBlock: {
     type: "FooterBlock",
     name: "Footer Directory",
-    icon: "🚪",
+    icon: ico(PanelBottom),
     category: "layout",
     description:
       "Visual website footer directory with logo, copyright notice, social links, and links categories.",
@@ -246,7 +274,7 @@ export const componentDefinitions: Record<string, ComponentDef> = {
   ColumnsBlock: {
     type: "ColumnsBlock",
     name: "Multi-Columns Grid",
-    icon: "🥞",
+    icon: ico(Columns2),
     category: "layout",
     description:
       "Grid layout supporting columns side-by-side with rich layouts, text, image, and style customizers.",
@@ -257,7 +285,7 @@ export const componentDefinitions: Record<string, ComponentDef> = {
       columns: [
         {
           type: "custom",
-          iconEmoji: "✨",
+          iconEmoji: "",
           title: "Premium Design Out-of-the-box",
           content:
             "Add titles, text, buttons, and custom layout badges to any grid column.",
@@ -272,7 +300,7 @@ export const componentDefinitions: Record<string, ComponentDef> = {
         },
         {
           type: "custom",
-          iconEmoji: "⚡",
+          iconEmoji: "",
           title: "Speed & Conversion",
           content:
             "Combine background boxes, text alignments, hover transitions, and custom html overlays.",
@@ -291,7 +319,7 @@ export const componentDefinitions: Record<string, ComponentDef> = {
   PricingBlock: {
     type: "PricingBlock",
     name: "Pricing Comparison",
-    icon: "🏷️",
+    icon: ico(CreditCard),
     category: "interactive",
     description:
       "Subscription pricing tiers comparison cards grid with visual checklist feature items.",
@@ -334,7 +362,7 @@ export const componentDefinitions: Record<string, ComponentDef> = {
   TextBlock: {
     type: "TextBlock",
     name: "Styled Text Container",
-    icon: "✍️",
+    icon: ico(AlignLeft),
     category: "content",
     description:
       "Markdown text block container with visual styling support (custom spacing, backgrounds, borders).",
@@ -346,12 +374,80 @@ export const componentDefinitions: Record<string, ComponentDef> = {
   EmbedBlock: {
     type: "EmbedBlock",
     name: "HTML / Embed Code",
-    icon: "🧩",
+    icon: ico(Braces),
     category: "interactive",
     description:
       "Insert raw HTML, iframe widgets, SVG icons, or custom contact forms.",
     defaultProps: {
       html: '<div style="padding: 20px; background: linear-gradient(135deg, #1e1b4b, #311042); border-radius: 12px; text-align: center; color: white;">\n  <h3>Custom HTML Embed</h3>\n  <p>Modify this code block to insert forms, inline CSS, widgets, or SVG graphics.</p>\n</div>',
+    },
+  },
+  AdmonitionBlock: {
+    type: "AdmonitionBlock",
+    name: "Admonition",
+    icon: ico(Lightbulb),
+    category: "content",
+    description: "Tip, Note, Warning, Danger, or Info callout block.",
+    defaultProps: {
+      type: "tip",
+      title: "Tip",
+      content: "This is a helpful tip for your readers.",
+    },
+  },
+  TabsBlock: {
+    type: "TabsBlock",
+    name: "Tab",
+    icon: ico(BookOpen),
+    category: "layout",
+    description: "Tabbed content switcher — organize content into tabs.",
+    defaultProps: {
+      tabs: [
+        { label: "Overview", content: "This is the overview tab content." },
+        { label: "Details", content: "Detailed information goes here." },
+        { label: "Example", content: "Code or usage examples go here." },
+      ],
+    },
+  },
+  StepBlock: {
+    type: "StepBlock",
+    name: "Step",
+    icon: ico(Rows3),
+    category: "content",
+    description: "Numbered or bulleted step-by-step guide block.",
+    defaultProps: {
+      variant: "number",
+      steps: [
+        { title: "Install the package", content: "Run `npm install` in your project directory." },
+        { title: "Configure settings", content: "Create a config file and set your options." },
+        { title: "Start building", content: "Run `npm run dev` to launch the dev server." },
+      ],
+    },
+  },
+  HighlightBlock: {
+    type: "HighlightBlock",
+    name: "Highlight",
+    icon: ico(Zap),
+    category: "content",
+    description: "A highlighted callout line with an accent prefix and color.",
+    defaultProps: {
+      prefix: "",
+      text: "This is an important highlighted note or callout.",
+      color: "#2563eb",
+    },
+  },
+  ContainerBlock: {
+    type: "ContainerBlock",
+    name: "Container",
+    icon: ico(Box),
+    category: "layout",
+    description: "A customizable wrapper box with title, content, background, and border controls.",
+    defaultProps: {
+      title: "",
+      content: "Add your content inside this container block.",
+      bgColor: "var(--bg-card)",
+      borderColor: "var(--border-color)",
+      borderRadius: 8,
+      padding: 20,
     },
   },
 };
@@ -361,12 +457,14 @@ export const componentCategories = [
   {
     key: "layout",
     label: "Layout",
-    icon: "🏗️",
+    icon: React.createElement(Columns2, { size: 13, strokeWidth: 1.8 }),
     types: [
       "NavBlock",
       "HeroBlock",
       "Card",
       "ColumnsBlock",
+      "TabsBlock",
+      "ContainerBlock",
       "DividerBlock",
       "FooterBlock",
     ],
@@ -374,25 +472,25 @@ export const componentCategories = [
   {
     key: "content",
     label: "Content",
-    icon: "📝",
-    types: ["TextBlock", "CalloutBlock", "ButtonBlock", "CodeBlock"],
+    icon: React.createElement(AlignLeft, { size: 13, strokeWidth: 1.8 }),
+    types: ["TextBlock", "CalloutBlock", "AdmonitionBlock", "HighlightBlock", "StepBlock", "ButtonBlock", "CodeBlock"],
   },
   {
     key: "media",
     label: "Media",
-    icon: "🖼️",
+    icon: React.createElement(Image, { size: 13, strokeWidth: 1.8 }),
     types: ["ImageBlock"],
   },
   {
     key: "interactive",
     label: "Interactive",
-    icon: "⚡",
+    icon: React.createElement(MousePointerClick, { size: 13, strokeWidth: 1.8 }),
     types: ["Accordion", "TestimonialRow", "PricingBlock", "EmbedBlock"],
   },
   {
     key: "data",
     label: "Data",
-    icon: "📊",
+    icon: React.createElement(BarChart3, { size: 13, strokeWidth: 1.8 }),
     types: ["StatsBlock"],
   },
 ];
